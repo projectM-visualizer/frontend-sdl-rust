@@ -33,7 +33,6 @@ dependencies = [
 name = "frontend-sdl2-rust"
 version = "0.1.0"
 dependencies = [
- "cc",
  "libc",
  "projectm-rs",
  "sdl2",

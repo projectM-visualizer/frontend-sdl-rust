@@ -7,6 +7,5 @@ edition = "2021"
 
 [dependencies]
 libc = "*"
-cc = "*"
 sdl2 = "0.35.2"
 projectm-rs = "*"
