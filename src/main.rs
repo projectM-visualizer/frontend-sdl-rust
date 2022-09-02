@@ -50,7 +50,7 @@ fn main() -> Result<(), String> {
 
     unsafe {
         projectm_rs::projectm_select_random_preset(projectm_handle, true);
-        projectm_rs::projectm_set_window_size(projectm_handle, settings.window_width.try_into().unwrap(), settings.window_height.try_into().unwrap())
+        projectm_rs::projectm_set_window_size(projectm_handle, 800, 600)
     }
     println!("projectm initialized!");
 
@@ -79,9 +79,7 @@ fn main() -> Result<(), String> {
             projectm_rs::projectm_render_frame(projectm_handle);    
         }
         
-        
-
-        canvas.clear();
+        // present/render
         canvas.present();
     }
 
