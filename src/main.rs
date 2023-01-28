@@ -9,7 +9,12 @@ fn main() -> Result<(), String> {
     // let audio_subsystem = sdl_context.audio()?;
 
     // create window
-    let window = video_subsystem.window("frontend-sdl2-rust", 800, 600)
+    // get screen dimensions
+    let mut display_index = 0;
+    let display_mode = video_subsystem.desktop_display_mode(display_index)?;
+    let mut window_width = display_mode.w as u32;
+    let mut window_height = display_mode.h as u32;
+    let window = video_subsystem.window("frontend-sdl2-rust",  window_width, window_height)
         .position_centered()
         .build()
         .expect("could not initialize video subsystem");
