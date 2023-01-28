@@ -8,4 +8,4 @@ edition = "2021"
 [dependencies]
 libc = "*"
 sdl2 = "0.35.2"
-projectm-rs = "^1.0.3"
+projectm-rs = "^1.0.4"
