@@ -1,5 +1,5 @@
 [package]
-name = "projectM-SDL"
+name = "projectm_sdl"
 version = "0.1.0"
 edition = "2021"
 
@@ -8,4 +8,5 @@ edition = "2021"
 [dependencies]
 libc = "*"
 sdl2 = "0.35.2"
+gl = "0.14.0"
 projectm-rs = "^1.0.4"
