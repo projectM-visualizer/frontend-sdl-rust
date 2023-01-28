@@ -1,5 +1,5 @@
 [package]
-name = "frontend-sdl2-rust"
+name = "projectM-SDL"
 version = "0.1.0"
 edition = "2021"
 
@@ -8,4 +8,4 @@ edition = "2021"
 [dependencies]
 libc = "*"
 sdl2 = "0.35.2"
-projectm-rs = "*"
+projectm-rs = "^1.0.3"
