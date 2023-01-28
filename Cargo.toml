@@ -9,3 +9,6 @@ edition = "2021"
 libc = "*"
 sdl2 = "0.35.2"
 projectm-rs = "^1.0.3"
+
+[dependencies.gl]
+git = "https://github.com/bjz/gl-rs"
