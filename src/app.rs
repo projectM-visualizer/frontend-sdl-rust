@@ -1,6 +1,7 @@
 use projectm_rs::core::{projectm, projectm_handle};
 use sdl2::video::GLProfile;
 
+pub mod audio;
 pub mod config;
 pub mod main_loop;
 pub mod playlist;
@@ -12,6 +13,7 @@ pub struct App {
     sdl_context: sdl2::Sdl,
     gl_context: sdl2::video::GLContext,
     window: sdl2::video::Window,
+    config: config::Config,
 }
 
 pub fn default_config() -> config::Config {
@@ -53,6 +55,7 @@ impl App {
 
         // initialize projectM
         let pm = projectm::create();
+
         // and a preset playlist
         let playlist = projectm_rs::playlist::Playlist::create(pm);
 
@@ -60,19 +63,25 @@ impl App {
         let (width, height) = window.drawable_size(); // highDPI aware
         projectm::set_window_size(pm, width.try_into().unwrap(), height.try_into().unwrap());
 
-        let mut this = Self {
+        Self {
             pm,
             playlist,
             sdl_context,
             gl_context,
             window,
-        };
-
-        // read config
-        if let Some(config) = config {
-            this.load_config(config);
+            config: if let Some(config) = config {
+                config
+            } else {
+                default_config()
+            },
         }
+    }
 
-        this
+    pub fn init(&mut self) {
+        // read config
+        self.load_config(&self.config);
+
+        // initialize audio
+        let audio = audio::Audio::new(&self);
     }
 }
