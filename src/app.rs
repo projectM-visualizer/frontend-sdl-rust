@@ -1,33 +1,25 @@
 use projectm_rs::core::{projectm, projectm_handle};
-use projectm_rs::playlist;
 use sdl2::video::GLProfile;
 
+pub mod config;
 pub mod main_loop;
-
-pub struct Config {
-    pub preset_path: Option<String>,
-}
-
-impl Default for Config {
-    fn default() -> Self {
-        // default preset path
-        Self {
-            // load from home dir or w/e
-            preset_path: Some(String::from("/usr/local/share/projectM/presets")),
-        }
-    }
-}
+pub mod playlist;
+pub mod video;
 
 pub struct App {
     pm: projectm_handle,
-    playlist: playlist::Playlist,
+    playlist: projectm_rs::playlist::Playlist,
     sdl_context: sdl2::Sdl,
     gl_context: sdl2::video::GLContext,
     window: sdl2::video::Window,
 }
 
+pub fn default_config() -> config::Config {
+    config::Config::default()
+}
+
 impl App {
-    pub fn new(config: Option<Config>) -> Self {
+    pub fn new(config: Option<crate::app::config::Config>) -> Self {
         // setup sdl
         let sdl_context = sdl2::init().unwrap();
         let video_subsystem = sdl_context.video().unwrap();
@@ -62,7 +54,7 @@ impl App {
         // initialize projectM
         let pm = projectm::create();
         // and a preset playlist
-        let mut playlist = projectm_rs::playlist::Playlist::create(pm);
+        let playlist = projectm_rs::playlist::Playlist::create(pm);
 
         // get/set window size
         let (width, height) = window.drawable_size(); // highDPI aware
@@ -82,19 +74,5 @@ impl App {
         }
 
         this
-    }
-
-    pub fn load_config(&mut self, config: Config) {
-        // load presets if provided
-        if let Some(preset_path) = config.preset_path {
-            self.add_preset_path(&preset_path);
-        }
-    }
-
-    /// Add presets to the playlist recursively skipping duplicates.
-    pub fn add_preset_path(&mut self, preset_path: &str) {
-        self.playlist.add_path(preset_path, true);
-        println!("added preset path: {}", preset_path);
-        println!("playlist size: {}", self.playlist.len());
     }
 }

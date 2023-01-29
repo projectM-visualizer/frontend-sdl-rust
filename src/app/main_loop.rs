@@ -15,6 +15,7 @@ impl App {
             // check for event
             for event in event_pump.poll_iter() {
                 match event {
+                    // quit (Esc)
                     Event::Quit { .. }
                     | Event::KeyDown {
                         keycode: Some(Keycode::Escape),
@@ -22,6 +23,53 @@ impl App {
                     } => {
                         break 'running;
                     }
+
+                    // Next preset (N, right-arrow)
+                    Event::KeyUp {
+                        keycode: Some(Keycode::N),
+                        ..
+                    } => {
+                        self.playlist_play_next();
+                    }
+                    // XXX: how to collapse these into one case?
+                    Event::KeyUp {
+                        keycode: Some(Keycode::Right),
+                        ..
+                    } => {
+                        self.playlist_play_next();
+                    }
+
+                    // Previous preset (P, left-arrow)
+                    Event::KeyUp {
+                        keycode: Some(Keycode::P),
+                        ..
+                    } => {
+                        self.playlist_play_prev();
+                    }
+                    Event::KeyUp {
+                        keycode: Some(Keycode::Left),
+                        ..
+                    } => {
+                        self.playlist_play_prev();
+                    }
+
+                    // Random preset (R)
+                    Event::KeyUp {
+                        keycode: Some(Keycode::R),
+                        ..
+                    } => {
+                        self.playlist.play_random();
+                    }
+
+                    // Toggle fullscreen (F)
+                    Event::KeyUp {
+                        keycode: Some(Keycode::F),
+                        ..
+                    } => {
+                        self.toggle_fullscreen();
+                    }
+
+                    // default
                     _ => {}
                 }
             }
