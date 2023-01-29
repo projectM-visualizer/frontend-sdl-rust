@@ -9,7 +9,7 @@ impl Default for Config {
     fn default() -> Self {
         // default preset path
         Self {
-            // load from home dir or w/e
+            // TODO: load from home dir or w/e
             preset_path: Some(String::from("/usr/local/share/projectM/presets")),
             frame_rate: Some(60),
         }

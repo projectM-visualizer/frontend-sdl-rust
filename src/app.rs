@@ -14,6 +14,7 @@ pub struct App {
     gl_context: sdl2::video::GLContext,
     window: sdl2::video::Window,
     config: config::Config,
+    audio: audio::Audio,
 }
 
 pub fn default_config() -> config::Config {
@@ -63,6 +64,9 @@ impl App {
         let (width, height) = window.drawable_size(); // highDPI aware
         projectm::set_window_size(pm, width.try_into().unwrap(), height.try_into().unwrap());
 
+        // initialize audio
+        let audio = audio::Audio::new(&sdl_context);
+
         Self {
             pm,
             playlist,
@@ -74,14 +78,12 @@ impl App {
             } else {
                 default_config()
             },
+            audio,
         }
     }
 
     pub fn init(&mut self) {
-        // read config
+        // load config
         self.load_config(&self.config);
-
-        // initialize audio
-        let audio = audio::Audio::new(&self);
     }
 }
