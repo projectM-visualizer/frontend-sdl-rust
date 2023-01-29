@@ -7,11 +7,18 @@ use crate::dummy_audio;
 
 impl App {
     pub fn main_loop(&mut self) {
+        let config = &self.config;
+        let frame_rate = config.frame_rate.unwrap();
+
         // events
         let mut event_pump = self.sdl_context.event_pump().unwrap();
+        let mut timer = self.sdl_context.timer().unwrap();
 
         // renderLoop
         'running: loop {
+            // get start time
+            let start_time = timer.ticks();
+
             // check for event
             for event in event_pump.poll_iter() {
                 match event {
@@ -82,6 +89,15 @@ impl App {
 
             // swap buffers
             self.window.gl_swap_window();
+
+            if frame_rate > 0 {
+                // calculate frame time
+                let frame_time = timer.ticks() - start_time;
+                if frame_time < 1000 / frame_rate {
+                    // sleep the remaining frame time
+                    timer.delay(1000 / frame_rate - frame_time);
+                }
+            }
         }
     }
 }
