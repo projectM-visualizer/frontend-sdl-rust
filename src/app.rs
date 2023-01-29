@@ -1,20 +1,33 @@
-use sdl2::event::Event;
-use sdl2::keyboard::Keycode;
+use projectm_rs::core::{projectm, projectm_handle};
+use projectm_rs::playlist;
 use sdl2::video::GLProfile;
 
-use projectm_rs::core::{projectm, projectm_handle};
+pub mod main_loop;
 
-use crate::dummy_audio;
+pub struct Config {
+    pub preset_path: Option<String>,
+}
+
+impl Default for Config {
+    fn default() -> Self {
+        // default preset path
+        Self {
+            // load from home dir or w/e
+            preset_path: Some(String::from("/usr/local/share/projectM/presets")),
+        }
+    }
+}
 
 pub struct App {
     pm: projectm_handle,
+    playlist: playlist::Playlist,
     sdl_context: sdl2::Sdl,
     gl_context: sdl2::video::GLContext,
     window: sdl2::video::Window,
 }
 
 impl App {
-    pub fn new() -> Self {
+    pub fn new(config: Option<Config>) -> Self {
         // setup sdl
         let sdl_context = sdl2::init().unwrap();
         let video_subsystem = sdl_context.video().unwrap();
@@ -35,7 +48,7 @@ impl App {
         let window_width = display_mode.w as u32;
         let window_height = display_mode.h as u32;
         let window = video_subsystem
-            .window("frontend-sdl2-rust", window_width, window_height)
+            .window("ProjectM", window_width, window_height)
             .opengl()
             .position_centered()
             .allow_highdpi()
@@ -48,48 +61,40 @@ impl App {
 
         // initialize projectM
         let pm = projectm::create();
+        // and a preset playlist
+        let mut playlist = projectm_rs::playlist::Playlist::create(pm);
 
         // get/set window size
         let (width, height) = window.drawable_size(); // highDPI aware
         projectm::set_window_size(pm, width.try_into().unwrap(), height.try_into().unwrap());
 
-        println!("projectm initialized!");
-        Self {
+        let mut this = Self {
             pm,
+            playlist,
             sdl_context,
             gl_context,
             window,
+        };
+
+        // read config
+        if let Some(config) = config {
+            this.load_config(config);
+        }
+
+        this
+    }
+
+    pub fn load_config(&mut self, config: Config) {
+        // load presets if provided
+        if let Some(preset_path) = config.preset_path {
+            self.add_preset_path(&preset_path);
         }
     }
 
-    pub fn main_loop(&mut self) {
-        // events
-        let mut event_pump = self.sdl_context.event_pump().unwrap();
-
-        // renderLoop
-        'running: loop {
-            // check for event
-            for event in event_pump.poll_iter() {
-                match event {
-                    Event::Quit { .. }
-                    | Event::KeyDown {
-                        keycode: Some(Keycode::Escape),
-                        ..
-                    } => {
-                        break 'running;
-                    }
-                    _ => {}
-                }
-            }
-
-            // generate random audio
-            dummy_audio::generate_random_audio_data(self.pm);
-
-            // render a frame
-            projectm::render_frame(self.pm);
-
-            // swap buffers
-            self.window.gl_swap_window();
-        }
+    /// Add presets to the playlist recursively skipping duplicates.
+    pub fn add_preset_path(&mut self, preset_path: &str) {
+        self.playlist.add_path(preset_path, true);
+        println!("added preset path: {}", preset_path);
+        println!("playlist size: {}", self.playlist.len());
     }
 }
