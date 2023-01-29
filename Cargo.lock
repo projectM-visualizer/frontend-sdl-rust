@@ -32,9 +32,9 @@ checksum = "bef38d45163c2f1dde094a7dfd33ccf595c92905c8f8f4fdc18d06fb1037718a"
 
 [[package]]
 name = "cc"
-version = "1.0.73"
+version = "1.0.78"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2fff2a6927b3bb87f9595d67196a70493f627687a71d87a0d692242c33f58c11"
+checksum = "a20104e2335ce8a659d6dd92a51a767a0c062599c73b343fd152cb401e828c3d"
 
 [[package]]
 name = "cexpr"
@@ -164,15 +164,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "projectM-SDL"
-version = "0.1.0"
-dependencies = [
- "libc",
- "projectm-rs",
- "sdl2",
-]
-
-[[package]]
 name = "projectm-rs"
 version = "1.0.4"
 dependencies = [
@@ -189,6 +180,15 @@ dependencies = [
  "bindgen",
  "cmake",
  "lazy_static",
+]
+
+[[package]]
+name = "projectm_sdl"
+version = "0.1.0"
+dependencies = [
+ "libc",
+ "projectm-rs",
+ "sdl2",
 ]
 
 [[package]]
@@ -269,9 +269,9 @@ checksum = "84a22b9f218b40614adcb3f4ff08b703773ad44fa9423e4e0d346d5db86e4ebc"
 
 [[package]]
 name = "version-compare"
-version = "0.1.0"
+version = "0.1.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "fe88247b92c1df6b6de80ddc290f3976dbdf2f5f5d3fd049a9fb598c6dd5ca73"
+checksum = "579a42fc0b8e0c63b76519a339be31bed574929511fa53c1a3acae26eb258f29"
 
 [[package]]
 name = "which"
