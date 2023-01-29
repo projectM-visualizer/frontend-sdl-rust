@@ -1,6 +1,6 @@
 use crate::app::App;
 
-impl App<'_> {
+impl App {
     pub fn toggle_fullscreen(&mut self) {
         let is_fullscreen = self.window.fullscreen_state();
         self.window

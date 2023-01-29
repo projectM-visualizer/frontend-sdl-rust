@@ -10,4 +10,8 @@ libc = "*"
 sdl2 = "0.35.2"
 # projectm-rs = "^1.0.4"
 projectm-rs = { path = "../projectm-rs" }
+clippy = "0.0.302"
 # gl = "0.14.0"
+
+[features]
+dummy_audio = []

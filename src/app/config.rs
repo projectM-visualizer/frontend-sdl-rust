@@ -1,7 +1,10 @@
 use crate::app::App;
+use projectm_rs::core::projectm;
+
+pub type FrameRate = u32;
 
 pub struct Config {
-    pub frame_rate: Option<u32>,
+    pub frame_rate: Option<FrameRate>,
     pub preset_path: Option<String>,
 }
 
@@ -22,5 +25,14 @@ impl App {
         if let Some(preset_path) = &config.preset_path {
             self.add_preset_path(&preset_path);
         }
+
+        // set frame rate if provided
+        if let Some(frame_rate) = config.frame_rate {
+            projectm::set_fps(self.pm, frame_rate.try_into().unwrap())
+        }
+    }
+
+    pub fn get_frame_rate(&self) -> FrameRate {
+        projectm::get_fps(self.pm)
     }
 }

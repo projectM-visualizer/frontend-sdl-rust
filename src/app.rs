@@ -7,14 +7,15 @@ pub mod main_loop;
 pub mod playlist;
 pub mod video;
 
+/// Application state
 pub struct App {
     pm: projectm_handle,
     playlist: projectm_rs::playlist::Playlist,
     sdl_context: sdl2::Sdl,
-    gl_context: sdl2::video::GLContext,
     window: sdl2::video::Window,
     config: config::Config,
     audio: audio::Audio,
+    _gl_context: sdl2::video::GLContext,
 }
 
 pub fn default_config() -> config::Config {
@@ -65,13 +66,12 @@ impl App {
         projectm::set_window_size(pm, width.try_into().unwrap(), height.try_into().unwrap());
 
         // initialize audio
-        let audio = audio::Audio::new(&sdl_context);
+        let audio = audio::Audio::new(&sdl_context, pm);
 
         Self {
             pm,
             playlist,
             sdl_context,
-            gl_context,
             window,
             config: if let Some(config) = config {
                 config
@@ -79,16 +79,15 @@ impl App {
                 default_config()
             },
             audio,
+            _gl_context: gl_context, // keep this around to keep the context alive
         }
     }
 
-    pub fn init(&self) {
+    pub fn init(&mut self) {
         // load config
         self.load_config(&self.config);
 
         // initialize audio
-        self.audio.list_devices();
-        // self.audio
-        //     .begin_audio_capture(projectm::get_frame_rate(self.pm));
+        self.audio.init(self.get_frame_rate());
     }
 }

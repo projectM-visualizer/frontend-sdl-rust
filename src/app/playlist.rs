@@ -1,6 +1,6 @@
 use crate::app::App;
 
-impl App<'_> {
+impl App {
     /// Add presets to the playlist recursively skipping duplicates.
     pub fn add_preset_path(&self, preset_path: &str) {
         self.playlist.add_path(preset_path, true);

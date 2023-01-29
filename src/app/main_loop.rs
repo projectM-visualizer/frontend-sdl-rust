@@ -3,6 +3,8 @@ use sdl2::event::Event;
 use sdl2::keyboard::Keycode;
 
 use crate::app::App;
+
+#[cfg(feature = "dummy_audio")]
 use crate::dummy_audio;
 
 impl App {
@@ -65,7 +67,7 @@ impl App {
                         keycode: Some(Keycode::R),
                         ..
                     } => {
-                        self.playlist.play_random();
+                        self.playlist_play_random();
                     }
 
                     // Toggle fullscreen (F)
@@ -91,6 +93,7 @@ impl App {
             }
 
             // generate random audio
+            #[cfg(feature = "dummy_audio")]
             dummy_audio::generate_random_audio_data(self.pm);
 
             // render a frame
