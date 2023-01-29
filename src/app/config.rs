@@ -16,8 +16,8 @@ impl Default for Config {
     }
 }
 
-impl App {
-    pub fn load_config(&mut self, config: &Config) {
+impl App<'_> {
+    pub fn load_config(&self, config: &Config) {
         // load presets if provided
         if let Some(preset_path) = &config.preset_path {
             self.add_preset_path(&preset_path);

@@ -5,7 +5,7 @@ use sdl2::keyboard::Keycode;
 use crate::app::App;
 use crate::dummy_audio;
 
-impl App {
+impl App<'_> {
     pub fn main_loop(&mut self) {
         let config = &self.config;
         let frame_rate = config.frame_rate.unwrap();
@@ -74,6 +74,15 @@ impl App {
                         ..
                     } => {
                         self.toggle_fullscreen();
+                    }
+
+                    // Next audio capture input device (ctl-I, cmd-I)
+                    Event::KeyUp {
+                        keycode: Some(Keycode::I),
+                        keymod: sdl2::keyboard::Mod::LCTRLMOD,
+                        ..
+                    } => {
+                        self.audio.open_next_device();
                     }
 
                     // default

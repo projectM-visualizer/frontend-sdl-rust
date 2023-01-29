@@ -7,6 +7,7 @@ fn main() -> Result<(), String> {
     // config.preset_path = Some("/usr/local/share/projectM/presets".to_string());
 
     let mut app = app::App::new(Some(config));
+    app.init();
 
     app.main_loop();
 
