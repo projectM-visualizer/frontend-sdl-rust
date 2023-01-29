@@ -15,8 +15,6 @@ pub struct App {
 
 impl App {
     pub fn new() -> Self {
-        let pm = projectm::create();
-
         // setup sdl
         let sdl_context = sdl2::init().unwrap();
         let video_subsystem = sdl_context.video().unwrap();
@@ -49,15 +47,11 @@ impl App {
         window.gl_make_current(&gl_context).unwrap();
 
         // initialize projectM
-        let projectm_handle = projectm::create();
+        let pm = projectm::create();
 
         // get/set window size
         let (width, height) = window.drawable_size(); // highDPI aware
-        projectm::set_window_size(
-            projectm_handle,
-            width.try_into().unwrap(),
-            height.try_into().unwrap(),
-        );
+        projectm::set_window_size(pm, width.try_into().unwrap(), height.try_into().unwrap());
 
         println!("projectm initialized!");
         Self {
