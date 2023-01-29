@@ -7,14 +7,14 @@ pub struct AudioCaptureDevice {
     index: AudioDeviceIndex,
 }
 
-pub struct Audio<'a> {
+pub struct Audio {
     audio_subsystem: sdl2::AudioSubsystem,
     audio_device_index: AudioDeviceIndex, // device_list: Option<Vec<sdl2::audio::AudioDevice>>,
     frame_rate: Option<u32>,
     capturing_device: Option<AudioDevice<AudioCaptureCallback>>,
 }
 
-impl Audio<'_> {
+impl Audio {
     pub fn new(sdl_context: &sdl2::Sdl) -> Self {
         let audio_subsystem = sdl_context.audio().unwrap();
 

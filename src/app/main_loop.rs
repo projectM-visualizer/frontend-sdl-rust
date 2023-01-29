@@ -5,7 +5,7 @@ use sdl2::keyboard::Keycode;
 use crate::app::App;
 use crate::dummy_audio;
 
-impl App<'_> {
+impl App {
     pub fn main_loop(&mut self) {
         let config = &self.config;
         let frame_rate = config.frame_rate.unwrap();

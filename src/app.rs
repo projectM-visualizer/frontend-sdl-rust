@@ -7,21 +7,21 @@ pub mod main_loop;
 pub mod playlist;
 pub mod video;
 
-pub struct App<'a> {
+pub struct App {
     pm: projectm_handle,
     playlist: projectm_rs::playlist::Playlist,
     sdl_context: sdl2::Sdl,
     gl_context: sdl2::video::GLContext,
     window: sdl2::video::Window,
     config: config::Config,
-    audio: audio::Audio<'a>,
+    audio: audio::Audio,
 }
 
 pub fn default_config() -> config::Config {
     config::Config::default()
 }
 
-impl App<'_> {
+impl App {
     pub fn new(config: Option<crate::app::config::Config>) -> Self {
         // setup sdl
         let sdl_context = sdl2::init().unwrap();
