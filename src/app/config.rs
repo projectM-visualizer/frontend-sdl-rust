@@ -1,5 +1,5 @@
 use crate::app::App;
-use projectm_rs::core::projectm;
+use projectm_rs::core::Projectm;
 
 pub type FrameRate = u32;
 
@@ -28,11 +28,11 @@ impl App {
 
         // set frame rate if provided
         if let Some(frame_rate) = config.frame_rate {
-            projectm::set_fps(self.pm, frame_rate.try_into().unwrap())
+            Projectm::set_fps(self.pm, frame_rate.try_into().unwrap())
         }
     }
 
     pub fn get_frame_rate(&self) -> FrameRate {
-        projectm::get_fps(self.pm)
+        Projectm::get_fps(self.pm)
     }
 }

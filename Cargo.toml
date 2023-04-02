@@ -9,7 +9,7 @@ edition = "2021"
 libc = "*"
 sdl2 = "0.35.2"
 # projectm-rs = "^1.0.4"
-projectm-rs = { path = "../projectm-rs" }
+projectm-rs = { git = "https://github.com/projectM-visualizer/projectm-rs" }
 clippy = "0.0.302"
 # gl = "0.14.0"
 

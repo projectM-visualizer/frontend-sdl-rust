@@ -1,4 +1,4 @@
-use projectm_rs::core::projectm;
+use projectm_rs::core::Projectm;
 use sdl2::event::Event;
 use sdl2::keyboard::Keycode;
 
@@ -97,7 +97,7 @@ impl App {
             dummy_audio::generate_random_audio_data(self.pm);
 
             // render a frame
-            projectm::render_frame(self.pm);
+            Projectm::render_frame(self.pm);
 
             // swap buffers
             self.window.gl_swap_window();

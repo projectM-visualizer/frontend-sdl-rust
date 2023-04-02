@@ -264,6 +264,7 @@ dependencies = [
 [[package]]
 name = "projectm-rs"
 version = "1.0.4"
+source = "git+https://github.com/projectM-visualizer/projectm-rs#af371b0b8ce317ab3400a760a6f7125908b818db"
 dependencies = [
  "libc",
  "projectm-sys",
@@ -272,9 +273,9 @@ dependencies = [
 
 [[package]]
 name = "projectm-sys"
-version = "1.0.5"
+version = "1.0.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "977c4ab0420105a5d1b6ee79331dfcf9b30687ff1e5396562def52d408ec52e9"
+checksum = "9d580074918dceab92771c0cc5657780776b9861c7a01afef4080c167dfac21c"
 dependencies = [
  "bindgen",
  "cmake",

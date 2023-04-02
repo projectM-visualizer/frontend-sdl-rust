@@ -1,4 +1,4 @@
-use projectm_rs::core::projectm_handle;
+use projectm_rs::core::ProjectMHandle;
 use sdl2::audio::{AudioCallback, AudioDevice, AudioSpecDesired};
 
 use super::config::FrameRate;
@@ -17,11 +17,11 @@ pub struct Audio {
     is_capturing: bool,
     frame_rate: Option<FrameRate>,
     capturing_device: Option<AudioDevice<AudioCaptureCallback>>,
-    projectm: projectm_handle,
+    projectm: ProjectMHandle,
 }
 
 impl Audio {
-    pub fn new(sdl_context: &sdl2::Sdl, projectm: projectm_handle) -> Self {
+    pub fn new(sdl_context: &sdl2::Sdl, projectm: ProjectMHandle) -> Self {
         let audio_subsystem = sdl_context.audio().unwrap();
 
         Self {
@@ -156,7 +156,7 @@ impl Audio {
 }
 
 struct AudioCaptureCallback {
-    pm: projectm_handle,
+    pm: ProjectMHandle,
     // spec: sdl2::audio::AudioSpec,
     // buffer_size: SampleFormat,
     // buffer: Vec<u8>,
@@ -172,6 +172,6 @@ impl AudioCallback for AudioCaptureCallback {
     // we need to pass it to projectm
     fn callback(&mut self, out: &mut [SampleFormat]) {
         let pm = self.pm;
-        projectm_rs::core::projectm::pcm_add_float(pm, out.to_vec(), 2);
+        projectm_rs::core::Projectm::pcm_add_float(pm, out.to_vec(), 2);
     }
 }
