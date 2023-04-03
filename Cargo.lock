@@ -183,7 +183,8 @@ dependencies = [
 [[package]]
 name = "projectm-rs"
 version = "1.0.5"
-source = "git+https://github.com/projectM-visualizer/projectm-rs#6a38fc545499799ea4121e4e38b24393fb06bd21"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "6c7adc99c8bb6bfc138265b279ca7d22f1d896b474e0c925abf6f3723403d09d"
 dependencies = [
  "libc",
  "projectm-sys",

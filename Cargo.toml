@@ -9,8 +9,9 @@ rust-version = "1.68.2"
 [dependencies]
 libc = "*"
 sdl2 = "0.35"
-# projectm-rs = "^1.0.4"
-projectm-rs = { git = "https://github.com/projectM-visualizer/projectm-rs" }
+projectm-rs = "1.0.5"
+#projectm-rs = { git = "https://github.com/projectM-visualizer/projectm-rs" }
+
 # gl = "0.14.0"
 
 [features]
