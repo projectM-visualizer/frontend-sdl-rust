@@ -2,15 +2,16 @@
 name = "projectm_sdl"
 version = "0.1.0"
 edition = "2021"
+rust-version = "1.68.2"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
 libc = "*"
-sdl2 = "0.35.2"
-# projectm-rs = "^1.0.4"
-projectm-rs = { path = "../projectm-rs" }
-clippy = "0.0.302"
+sdl2 = "0.35"
+projectm-rs = "1.0.5"
+#projectm-rs = { git = "https://github.com/projectM-visualizer/projectm-rs" }
+
 # gl = "0.14.0"
 
 [features]

@@ -1,4 +1,4 @@
-use projectm_rs::core::{projectm, projectm_handle};
+use projectm_rs::core::{ProjectMHandle, Projectm};
 use sdl2::video::GLProfile;
 
 pub mod audio;
@@ -9,7 +9,7 @@ pub mod video;
 
 /// Application state
 pub struct App {
-    pm: projectm_handle,
+    pm: ProjectMHandle,
     playlist: projectm_rs::playlist::Playlist,
     sdl_context: sdl2::Sdl,
     window: sdl2::video::Window,
@@ -56,14 +56,14 @@ impl App {
         window.gl_make_current(&gl_context).unwrap();
 
         // initialize projectM
-        let pm = projectm::create();
+        let pm = Projectm::create();
 
         // and a preset playlist
         let playlist = projectm_rs::playlist::Playlist::create(pm);
 
         // get/set window size
         let (width, height) = window.drawable_size(); // highDPI aware
-        projectm::set_window_size(pm, width.try_into().unwrap(), height.try_into().unwrap());
+        Projectm::set_window_size(pm, width.try_into().unwrap(), height.try_into().unwrap());
 
         // initialize audio
         let audio = audio::Audio::new(&sdl_context, pm);
@@ -73,11 +73,7 @@ impl App {
             playlist,
             sdl_context,
             window,
-            config: if let Some(config) = config {
-                config
-            } else {
-                default_config()
-            },
+            config: config.unwrap_or_else(default_config),
             audio,
             _gl_context: gl_context, // keep this around to keep the context alive
         }

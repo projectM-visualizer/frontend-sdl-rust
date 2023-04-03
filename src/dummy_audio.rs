@@ -1,6 +1,7 @@
-use projectm_rs::core::{projectm, projectm_handle};
+use projectm_rs::core::{ProjectMHandle, Projectm};
 
-pub fn generate_random_audio_data(projectm_handle: projectm_handle) {
+#[allow(dead_code)]
+pub fn generate_random_audio_data(projectm_handle: ProjectMHandle) {
     let mut pcm_data: [[libc::c_short; 512]; 2] = [[0; 512]; 2];
     let mut i: libc::c_int = 0 as libc::c_int;
     while i < 512 as libc::c_int {
@@ -13,5 +14,5 @@ pub fn generate_random_audio_data(projectm_handle: projectm_handle) {
         i += 1
     }
 
-    projectm::pcm_add_int16(projectm_handle, &pcm_data[0][0], 512, 2)
+    Projectm::pcm_add_int16(projectm_handle, vec![pcm_data[0][0]], 2)
 }

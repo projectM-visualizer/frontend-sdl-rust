@@ -1,4 +1,4 @@
-use projectm_rs::core::projectm_handle;
+use projectm_rs::core::ProjectMHandle;
 use sdl2::audio::{AudioCallback, AudioDevice, AudioSpecDesired};
 
 use super::config::FrameRate;
@@ -17,11 +17,11 @@ pub struct Audio {
     is_capturing: bool,
     frame_rate: Option<FrameRate>,
     capturing_device: Option<AudioDevice<AudioCaptureCallback>>,
-    projectm: projectm_handle,
+    projectm: ProjectMHandle,
 }
 
 impl Audio {
-    pub fn new(sdl_context: &sdl2::Sdl, projectm: projectm_handle) -> Self {
+    pub fn new(sdl_context: &sdl2::Sdl, projectm: ProjectMHandle) -> Self {
         let audio_subsystem = sdl_context.audio().unwrap();
 
         Self {
@@ -59,11 +59,9 @@ impl Audio {
     }
 
     pub fn get_current_device_name(&self) -> String {
-        let device_name = self
-            .audio_subsystem
+        self.audio_subsystem
             .audio_capture_device_name(self.device_index)
-            .expect("could not get audio device");
-        device_name
+            .expect("could not get audio device")
     }
 
     pub fn open_next_device(&mut self) {
@@ -81,23 +79,20 @@ impl Audio {
             .num_audio_capture_devices()
             .expect("could not get number of audio devices");
 
-        let mut device_list: Vec<AudioCaptureDevice> = vec![];
-
-        for i in 0..num_devices {
-            let device_name = audio_subsystem
-                .audio_capture_device_name(i)
-                .expect("could not get audio device");
-
-            device_list.push(AudioCaptureDevice {
-                name: device_name,
-                index: i,
-            });
-        }
-
-        device_list
+        (0..num_devices)
+            .map(|i| {
+                let device_name = audio_subsystem
+                    .audio_capture_device_name(i)
+                    .expect("could not get audio device");
+                AudioCaptureDevice {
+                    name: device_name,
+                    index: i,
+                }
+            })
+            .collect::<Vec<_>>()
     }
 
-    pub fn begin_audio_capture<'a>(&'a mut self) {
+    pub fn begin_audio_capture(&mut self) {
         let sample_rate: u32 = 44100;
         let frame_rate = self.frame_rate.unwrap();
 
@@ -156,7 +151,7 @@ impl Audio {
 }
 
 struct AudioCaptureCallback {
-    pm: projectm_handle,
+    pm: ProjectMHandle,
     // spec: sdl2::audio::AudioSpec,
     // buffer_size: SampleFormat,
     // buffer: Vec<u8>,
@@ -172,6 +167,6 @@ impl AudioCallback for AudioCaptureCallback {
     // we need to pass it to projectm
     fn callback(&mut self, out: &mut [SampleFormat]) {
         let pm = self.pm;
-        projectm_rs::core::projectm::pcm_add_float(pm, out.to_vec(), 2);
+        projectm_rs::core::Projectm::pcm_add_float(pm, out.to_vec(), 2);
     }
 }

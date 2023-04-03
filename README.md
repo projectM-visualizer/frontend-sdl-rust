@@ -89,6 +89,19 @@ cargo run
 cargo build
 ```
 
+### If using SDL installed via Homebrew
+
+```
+RUSTFLAGS="-L$(brew --prefix sdl2)/lib" cargo build
+RUSTFLAGS="-L$(brew --prefix sdl2)/lib" cargo run
+```
+
+### Optimized build
+
+```
+cargo run --release
+```
+
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 
