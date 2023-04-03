@@ -1,5 +1,6 @@
-use projectm_rs::core::{Projectm, ProjectMHandle};
+use projectm_rs::core::{ProjectMHandle, Projectm};
 
+#[allow(dead_code)]
 pub fn generate_random_audio_data(projectm_handle: ProjectMHandle) {
     let mut pcm_data: [[libc::c_short; 512]; 2] = [[0; 512]; 2];
     let mut i: libc::c_int = 0 as libc::c_int;

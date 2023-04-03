@@ -1,4 +1,4 @@
-use projectm_rs::core::{Projectm, ProjectMHandle};
+use projectm_rs::core::{ProjectMHandle, Projectm};
 use sdl2::video::GLProfile;
 
 pub mod audio;
@@ -73,11 +73,7 @@ impl App {
             playlist,
             sdl_context,
             window,
-            config: if let Some(config) = config {
-                config
-            } else {
-                default_config()
-            },
+            config: config.unwrap_or_else(default_config),
             audio,
             _gl_context: gl_context, // keep this around to keep the context alive
         }

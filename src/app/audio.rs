@@ -59,11 +59,9 @@ impl Audio {
     }
 
     pub fn get_current_device_name(&self) -> String {
-        let device_name = self
-            .audio_subsystem
+        self.audio_subsystem
             .audio_capture_device_name(self.device_index)
-            .expect("could not get audio device");
-        device_name
+            .expect("could not get audio device")
     }
 
     pub fn open_next_device(&mut self) {
@@ -81,23 +79,20 @@ impl Audio {
             .num_audio_capture_devices()
             .expect("could not get number of audio devices");
 
-        let mut device_list: Vec<AudioCaptureDevice> = vec![];
-
-        for i in 0..num_devices {
-            let device_name = audio_subsystem
-                .audio_capture_device_name(i)
-                .expect("could not get audio device");
-
-            device_list.push(AudioCaptureDevice {
-                name: device_name,
-                index: i,
-            });
-        }
-
-        device_list
+        (0..num_devices)
+            .map(|i| {
+                let device_name = audio_subsystem
+                    .audio_capture_device_name(i)
+                    .expect("could not get audio device");
+                AudioCaptureDevice {
+                    name: device_name,
+                    index: i,
+                }
+            })
+            .collect::<Vec<_>>()
     }
 
-    pub fn begin_audio_capture<'a>(&'a mut self) {
+    pub fn begin_audio_capture(&mut self) {
         let sample_rate: u32 = 44100;
         let frame_rate = self.frame_rate.unwrap();
 
