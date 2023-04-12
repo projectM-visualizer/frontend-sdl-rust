@@ -8,6 +8,7 @@ pub type FrameRate = u32;
 pub struct Config {
     pub frame_rate: Option<FrameRate>,
     pub preset_path: Option<String>,
+    pub texture_path: Option<String>,
 }
 
 impl Default for Config {
@@ -16,6 +17,7 @@ impl Default for Config {
         Self {
             // TODO: load from home dir or w/e
             preset_path: Some("/usr/local/share/projectM/presets".to_owned()),
+            texture_path: Some("/usr/local/share/projectM/textures".to_owned()),
             frame_rate: Some(60),
         }
     }
@@ -31,6 +33,13 @@ impl App {
         // set frame rate if provided
         if let Some(frame_rate) = config.frame_rate {
             Projectm::set_fps(self.pm, frame_rate)
+        }
+
+        // load textures if provided
+        if let Some(texture_path) = &config.texture_path {
+            let mut paths: Vec<String> = Vec::new();
+            paths.push(texture_path.into());
+            Projectm::set_texture_search_paths(self.pm, &paths, 1);
         }
     }
 
