@@ -13,7 +13,7 @@
 <h3 align="center">Frontend-SDL2-Rust</h3>
 
   <p align="center">
-    Example rust app, utilizing the <a href="https://crates.io/crates/projectm-rs" target="_blank">projectm-rs</a> crate
+    Example rust app, utilizing the <a href="https://crates.io/crates/projectm-rs" target="_blank">projectM</a> crate
     <br />
     <br />
     <a href="https://github.com/projectM-visualizer/frontend-sdl2-rust/issues" target="_blank">Report Bug</a>
