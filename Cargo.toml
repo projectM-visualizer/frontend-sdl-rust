@@ -8,11 +8,10 @@ rust-version = "1.68.2"
 
 [dependencies]
 libc = "*"
-sdl2 = "0.35"
-projectm-rs = "1.0.5"
-# projectm-rs = { path = "../projectm-rs" }
-#projectm-rs = { git = "https://github.com/projectM-visualizer/projectm-rs" }
-
+sdl3 = { git = "https://github.com/revmischa/sdl3-rs.git" }
+# projectm = "1.0.5"
+projectm = { path = "../projectm-rs" }
+#projectm = { git = "https://github.com/projectM-visualizer/projectm" }
 # gl = "0.14.0"
 
 [features]

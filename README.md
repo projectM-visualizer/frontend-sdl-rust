@@ -10,15 +10,15 @@
 
 <br />
 
-<h3 align="center">Frontend-SDL2-Rust</h3>
+<h3 align="center">ProjectM</h3>
 
   <p align="center">
-    Example rust app, utilizing the <a href="https://crates.io/crates/projectm-rs" target="_blank">projectM</a> crate
+    Reference projectM application in Rust, utilizing the <a href="https://crates.io/crates/projectm" target="_blank">projectM</a> crate
     <br />
     <br />
-    <a href="https://github.com/projectM-visualizer/frontend-sdl2-rust/issues" target="_blank">Report Bug</a>
+    <a href="https://github.com/projectM-visualizer/frontend-sdl-rust/issues" target="_blank">Report Bug</a>
     ·
-    <a href="https://github.com/projectM-visualizer/frontend-sdl2-rust/issues" target="_blank">Request Feature</a>
+    <a href="https://github.com/projectM-visualizer/frontend-sdl-rust/issues" target="_blank">Request Feature</a>
   </p>
 </div>
 
@@ -45,6 +45,7 @@
 <br />
 
 <!-- GETTING STARTED -->
+
 ## Getting Started
 
 To get this crate up and running properly, you'll need to install some prerequisites.
@@ -56,29 +57,29 @@ development files. To build projectM, both binaries and development files need t
 
 #### General build dependencies for all platforms:
 
-* [**Rust**](https://www.rust-lang.org/tools/install)
-* A working build toolchain.
-* [**CMake**](https://cmake.org/): Used to generate platform-specific build files.
-* **OpenGL**: 3D graphics library. Used to render the visualizations.
-* or **GLES3**: OpenGL libraries for embedded systems, version 3. Required to build projectM on Android devices,
+- [**Rust**](https://www.rust-lang.org/tools/install)
+- A working build toolchain.
+- [**CMake**](https://cmake.org/): Used to generate platform-specific build files.
+- **OpenGL**: 3D graphics library. Used to render the visualizations.
+- or **GLES3**: OpenGL libraries for embedded systems, version 3. Required to build projectM on Android devices,
   Raspberry Pi, Emscripten and the Universal Windows Platform.
-* [**glm**](https://github.com/g-truc/glm):  OpenGL Mathematics library. Optional, will use a bundled version with
+- [**glm**](https://github.com/g-truc/glm): OpenGL Mathematics library. Optional, will use a bundled version with
   autotools or if not installed.
-* [**SDL2**](https://github.com/libsdl-org/SDL): Simple Directmedia Layer. Version 2.0.5 or higher is required to build
+- [**SDL3**](https://github.com/libsdl-org/SDL): Simple Directmedia Layer >= 3. Provided by sdl3-rs.
   the test UI.
-* [**LLVM**](https://llvm.org/): Low-Level Virtual Machine. Optional and **experimental**, used to speed up preset
+- [**LLVM**](https://llvm.org/): Low-Level Virtual Machine. Optional and **experimental**, used to speed up preset
   execution by leveraging the LLVM JIT compiler.
 
 #### Only relevant for Windows:
 
-* [**vcpkg**](https://github.com/microsoft/vcpkg): C++ Library Manager for Windows. _Optional_, but recommended to
+- [**vcpkg**](https://github.com/microsoft/vcpkg): C++ Library Manager for Windows. _Optional_, but recommended to
   install the aforementioned library dependencies.
-* [**GLEW**](http://glew.sourceforge.net/): The OpenGL Extension Wrangler Library. Only required if using CMake to
-  configure the build, the pre-created solutions use a bundled copy of GLEW.
+- [**GLEW**](http://glew.sourceforge.net/): The OpenGL Extension Wrangler Library. Only required if using CMake to
+configure the build, the pre-created solutions use a bundled copy of GLEW.
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
-
 <!-- USAGE EXAMPLES -->
+
 ## Usage
 
 ```
@@ -92,8 +93,8 @@ cargo build
 ### If using SDL installed via Homebrew
 
 ```
-RUSTFLAGS="-L$(brew --prefix sdl2)/lib" cargo build
-RUSTFLAGS="-L$(brew --prefix sdl2)/lib" cargo run
+RUSTFLAGS="-L$(brew --prefix sdl3)/lib" cargo build
+RUSTFLAGS="-L$(brew --prefix sdl3)/lib" cargo run
 ```
 
 ### Optimized build
@@ -104,9 +105,8 @@ cargo run --release
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
-
-
 <!-- CONTRIBUTING -->
+
 ## Contributing
 
 Contributions are what make the open source community such an amazing place to learn, inspire, and create. Any contributions you make are **greatly appreciated**.
@@ -122,9 +122,8 @@ Don't forget to give the project a star! Thanks again!
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
-
-
 <!-- LICENSE -->
+
 ## License
 
 Distributed under the LGPL-2.1 license. See `LICENSE` for more information.
@@ -132,6 +131,7 @@ Distributed under the LGPL-2.1 license. See `LICENSE` for more information.
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 <!-- SUPPORT -->
+
 ## Support
 
 [![Discord][discord-shield]][discord-url]
@@ -139,6 +139,7 @@ Distributed under the LGPL-2.1 license. See `LICENSE` for more information.
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 <!-- CONTACT -->
+
 ## Contact
 
 Blaquewithaq (Discord: SoFloppy#1289) - [@anomievision](https://twitter.com/anomievision) - anomievision@gmail.com
@@ -147,16 +148,17 @@ Blaquewithaq (Discord: SoFloppy#1289) - [@anomievision](https://twitter.com/anom
 
 <!-- MARKDOWN LINKS & IMAGES -->
 <!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
+
 [contributors-shield]: https://img.shields.io/github/contributors/projectM-visualizer/projectm-rs.svg?style=for-the-badge
-[contributors-url]: https://github.com/projectM-visualizer/frontend-sdl2-rust/graphs/contributors
+[contributors-url]: https://github.com/projectM-visualizer/frontend-sdl-rust/graphs/contributors
 [forks-shield]: https://img.shields.io/github/forks/projectM-visualizer/projectm-rs.svg?style=for-the-badge
-[forks-url]: https://github.com/projectM-visualizer/frontend-sdl2-rust/network/members
+[forks-url]: https://github.com/projectM-visualizer/frontend-sdl-rust/network/members
 [stars-shield]: https://img.shields.io/github/stars/projectM-visualizer/projectm-rs.svg?style=for-the-badge
-[stars-url]: https://github.com/projectM-visualizer/frontend-sdl2-rust/stargazers
+[stars-url]: https://github.com/projectM-visualizer/frontend-sdl-rust/stargazers
 [issues-shield]: https://img.shields.io/github/issues/projectM-visualizer/projectm-rs.svg?style=for-the-badge
-[issues-url]: https://github.com/projectM-visualizer/frontend-sdl2-rust/issues
+[issues-url]: https://github.com/projectM-visualizer/frontend-sdl-rust/issues
 [license-shield]: https://img.shields.io/github/license/projectM-visualizer/projectm-rs.svg?style=for-the-badge
-[license-url]: https://github.com/projectM-visualizer/frontend-sdl2-rust/blob/master/LICENSE
+[license-url]: https://github.com/projectM-visualizer/frontend-sdl-rust/blob/master/LICENSE
 [crates-shield]: https://img.shields.io/crates/v/projectm-rs?style=for-the-badge
 [crates-url]: https://crates.io/crates/projectm-rs
 [crates-dl-shield]: https://img.shields.io/crates/d/projectm-rs?style=for-the-badge
