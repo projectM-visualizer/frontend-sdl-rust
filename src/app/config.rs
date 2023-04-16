@@ -1,5 +1,6 @@
 use crate::app::App;
 use projectm_rs::core::Projectm;
+use std::path::Path;
 
 pub type FrameRate = u32;
 
@@ -25,11 +26,28 @@ pub struct Config {
 
 impl Default for Config {
     fn default() -> Self {
-        // default preset path
+        // get paths to presets and textures
+        // TODO: get from config file or env
+        //
+        // use /usr/local/share/projectM if it exists, otherwise use local paths
+        let resource_dir = "/usr/local/share/projectM";
+        let dir_exists = Path::new(&resource_dir).exists();
+        let preset_path = if dir_exists {
+            String::from(resource_dir) + "/presets"
+        } else {
+            // just test presets
+            "./presets".to_owned()
+        };
+        let texture_path = if dir_exists {
+            String::from(resource_dir) + "/textures"
+        } else {
+            // doesn't exist
+            "./textures".to_owned()
+        };
+
         Self {
-            // TODO: load from home dir or w/e
-            preset_path: Some("/usr/local/share/projectM/presets".to_owned()),
-            texture_path: Some("/usr/local/share/projectM/textures".to_owned()),
+            preset_path: Path::new(&preset_path).exists().then(|| preset_path),
+            texture_path: Path::new(&texture_path).exists().then(|| texture_path),
             frame_rate: Some(60),
             beat_sensitivity: Some(1.0),
             preset_duration: Some(10.0),
@@ -65,6 +83,9 @@ impl App {
         if let Some(preset_duration) = config.preset_duration {
             Projectm::set_preset_duration(self.pm, preset_duration);
         }
+
+        // set preset shuffle mode
+        // self.playlist.set_shuffle(true);
     }
 
     pub fn get_frame_rate(&self) -> FrameRate {
