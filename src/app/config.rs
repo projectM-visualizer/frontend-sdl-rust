@@ -39,6 +39,8 @@ impl Default for Config {
 
 impl App {
     pub fn load_config(&self, config: &Config) {
+        let pm = *self.pm.lock().unwrap();
+
         // load presets if provided
         if let Some(preset_path) = &config.preset_path {
             self.add_preset_path(preset_path);
@@ -46,28 +48,29 @@ impl App {
 
         // set frame rate if provided
         if let Some(frame_rate) = config.frame_rate {
-            Projectm::set_fps(self.pm, frame_rate)
+            Projectm::set_fps(pm, frame_rate)
         }
 
         // load textures if provided
         if let Some(texture_path) = &config.texture_path {
             let mut paths: Vec<String> = Vec::new();
             paths.push(texture_path.into());
-            Projectm::set_texture_search_paths(self.pm, &paths, 1);
+            Projectm::set_texture_search_paths(pm, &paths, 1);
         }
 
         // set beat sensitivity if provided
         if let Some(beat_sensitivity) = config.beat_sensitivity {
-            Projectm::set_beat_sensitivity(self.pm, beat_sensitivity);
+            Projectm::set_beat_sensitivity(pm, beat_sensitivity);
         }
 
         // set preset duration if provided
         if let Some(preset_duration) = config.preset_duration {
-            Projectm::set_preset_duration(self.pm, preset_duration);
+            Projectm::set_preset_duration(pm, preset_duration);
         }
     }
 
     pub fn get_frame_rate(&self) -> FrameRate {
-        Projectm::get_fps(self.pm)
+        let pm = *self.pm.lock().unwrap();
+        Projectm::get_fps(pm)
     }
 }

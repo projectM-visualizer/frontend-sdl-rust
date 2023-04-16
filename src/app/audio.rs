@@ -1,7 +1,10 @@
 use projectm_rs::core::ProjectMHandle;
 use sdl2::audio::{AudioCallback, AudioDevice, AudioSpecDesired};
+use std::sync::Arc;
+use std::sync::Mutex;
 
 use super::config::FrameRate;
+use super::ProjectMWrapped;
 
 type AudioDeviceIndex = u32;
 type SampleFormat = f32; // format of audio samples
@@ -17,11 +20,12 @@ pub struct Audio {
     is_capturing: bool,
     frame_rate: Option<FrameRate>,
     capturing_device: Option<AudioDevice<AudioCaptureCallback>>,
-    projectm: ProjectMHandle,
+    projectm: ProjectMWrapped,
 }
 
+/// Wrapper around the audio subsystem to capture audio and pass it to projectM.
 impl Audio {
-    pub fn new(sdl_context: &sdl2::Sdl, projectm: ProjectMHandle) -> Self {
+    pub fn new(sdl_context: &sdl2::Sdl, projectm: ProjectMWrapped) -> Self {
         let audio_subsystem = sdl_context.audio().unwrap();
 
         Self {
@@ -52,7 +56,8 @@ impl Audio {
         }
     }
 
-    pub fn set_device(&mut self, device_index: AudioDeviceIndex) {
+    /// Start capturing audio from device_index.
+    pub fn capture_device(&mut self, device_index: AudioDeviceIndex) {
         self.stop_audio_capture();
         self.device_index = device_index;
         self.begin_audio_capture();
@@ -64,12 +69,14 @@ impl Audio {
             .expect("could not get audio device")
     }
 
+    /// Select a new audio device and start capturing audio from it.
     pub fn open_next_device(&mut self) {
         let device_list = self.get_device_list();
         let current_device_index = self.device_index;
 
-        let next_device_index = current_device_index + 1 % device_list.len() as AudioDeviceIndex;
-        self.set_device(next_device_index);
+        let next_device_index = (current_device_index + 1) % device_list.len() as AudioDeviceIndex;
+        println!("Opening next device: {}", next_device_index);
+        self.capture_device(next_device_index);
     }
 
     fn get_device_list(&self) -> Vec<AudioCaptureDevice> {
@@ -105,7 +112,8 @@ impl Audio {
             samples: Some(buffer_size),
         };
 
-        let audio_device = self
+        // open audio device for capture
+        let audio_device = match self
             .audio_subsystem // sdl
             .open_capture(None, &desired_spec, |_spec| {
                 println!(
@@ -118,14 +126,19 @@ impl Audio {
 
                 // return callback fn
                 AudioCaptureCallback {
-                    pm: self.projectm,
+                    pm: self.projectm.clone(),
                     // spec,
                     // buffer_size,
                     // buffer: vec![0; buffer_size as usize],
                     // position: 0,
                 }
-            })
-            .unwrap();
+            }) {
+            Ok(device) => device,
+            Err(e) => {
+                println!("Error opening audio device: {}", e);
+                return;
+            }
+        };
 
         // take ownership of device
         self.capturing_device = Some(audio_device);
@@ -140,18 +153,21 @@ impl Audio {
         println!("Stopping audio capture for device {}", current_device_name);
 
         println!(
-            "current capture device: {:?}",
+            "Current capture device status: {:?}",
             self.capturing_device.as_ref().unwrap().status()
         );
 
         self.is_capturing = false;
-        // drop(self.capturing_device); // stop capturing
         self.capturing_device = None;
     }
 }
 
 struct AudioCaptureCallback {
-    pm: ProjectMHandle,
+    // audio_tx: mpsc::Sender<Vec<SampleFormat>>,
+
+    // we need to keep a reference to the projectm instance to
+    // add the audio data to it
+    pm: Arc<Mutex<ProjectMHandle>>,
     // spec: sdl2::audio::AudioSpec,
     // buffer_size: SampleFormat,
     // buffer: Vec<u8>,
@@ -166,7 +182,9 @@ impl AudioCallback for AudioCaptureCallback {
     // we are receiving some chunk of audio data
     // we need to pass it to projectm
     fn callback(&mut self, out: &mut [SampleFormat]) {
-        let pm = self.pm;
-        projectm_rs::core::Projectm::pcm_add_float(pm, out.to_vec(), 2);
+        {
+            let pm = *self.pm.lock().unwrap();
+            projectm_rs::core::Projectm::pcm_add_float(pm, out.to_vec(), 2);
+        }
     }
 }
