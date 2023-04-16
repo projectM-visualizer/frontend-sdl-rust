@@ -5,8 +5,8 @@ impl App {
         let is_fullscreen = self.window.fullscreen_state();
         self.window
             .set_fullscreen(match is_fullscreen {
-                sdl2::video::FullscreenType::True => sdl2::video::FullscreenType::Off,
-                _ => sdl2::video::FullscreenType::True,
+                sdl3::video::FullscreenType::True => sdl3::video::FullscreenType::Off,
+                _ => sdl3::video::FullscreenType::True,
             })
             .unwrap();
     }

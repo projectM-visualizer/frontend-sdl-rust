@@ -1,5 +1,5 @@
-use projectm_rs::core::ProjectMHandle;
-use sdl2::audio::{AudioCallback, AudioDevice, AudioSpecDesired};
+use projectm::core::ProjectMHandle;
+use sdl3::audio::{AudioCallback, AudioDevice, AudioSpecDesired};
 use std::sync::Arc;
 use std::sync::Mutex;
 
@@ -15,7 +15,7 @@ pub struct AudioCaptureDevice {
 }
 
 pub struct Audio {
-    audio_subsystem: sdl2::AudioSubsystem,
+    audio_subsystem: sdl3::AudioSubsystem,
     device_index: AudioDeviceIndex,
     is_capturing: bool,
     frame_rate: Option<FrameRate>,
@@ -25,7 +25,7 @@ pub struct Audio {
 
 /// Wrapper around the audio subsystem to capture audio and pass it to projectM.
 impl Audio {
-    pub fn new(sdl_context: &sdl2::Sdl, projectm: ProjectMWrapped) -> Self {
+    pub fn new(sdl_context: &sdl3::Sdl, projectm: ProjectMWrapped) -> Self {
         let audio_subsystem = sdl_context.audio().unwrap();
 
         Self {
@@ -106,7 +106,7 @@ impl Audio {
         // how many samples to capture at a time
         // should be enough for 1 frame or less
         // should not be larger than max_samples / channels
-        let max_samples: usize = projectm_rs::core::Projectm::pcm_get_max_samples()
+        let max_samples: usize = projectm::core::Projectm::pcm_get_max_samples()
             .try_into()
             .unwrap();
         let samples_per_frame = (sample_rate / frame_rate) as usize;
@@ -183,6 +183,6 @@ impl AudioCallback for AudioCaptureCallback {
     // we need to pass it to projectm
     fn callback(&mut self, out: &mut [SampleFormat]) {
         let pm = *self.pm.lock().unwrap();
-        projectm_rs::core::Projectm::pcm_add_float(pm, out.to_vec(), 2);
+        projectm::core::Projectm::pcm_add_float(pm, out.to_vec(), 2);
     }
 }

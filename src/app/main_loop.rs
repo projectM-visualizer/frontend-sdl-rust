@@ -1,6 +1,6 @@
-use projectm_rs::core::Projectm;
-use sdl2::event::Event;
-use sdl2::keyboard::Keycode;
+use projectm::core::Projectm;
+use sdl3::event::Event;
+use sdl3::keyboard::Keycode;
 
 use crate::app::App;
 
@@ -14,7 +14,7 @@ impl App {
 
         // events
         let mut event_pump = self.sdl_context.event_pump().unwrap();
-        let mut timer = self.sdl_context.timer().unwrap();
+        let timer = self.sdl_context.timer().unwrap();
 
         // renderLoop
         'running: loop {
@@ -82,10 +82,10 @@ impl App {
                     Event::KeyUp {
                         keycode: Some(Keycode::I),
                         keymod:
-                            sdl2::keyboard::Mod::LCTRLMOD
-                            | sdl2::keyboard::Mod::RCTRLMOD
-                            | sdl2::keyboard::Mod::LGUIMOD
-                            | sdl2::keyboard::Mod::RGUIMOD,
+                            sdl3::keyboard::Mod::LCTRLMOD
+                            | sdl3::keyboard::Mod::RCTRLMOD
+                            | sdl3::keyboard::Mod::LGUIMOD
+                            | sdl3::keyboard::Mod::RGUIMOD,
                         ..
                     } => {
                         self.audio.open_next_device();

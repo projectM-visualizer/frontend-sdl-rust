@@ -181,8 +181,10 @@ dependencies = [
 ]
 
 [[package]]
-name = "projectm-rs"
+name = "projectm"
 version = "1.0.5"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "0a14398d9b43666e48c94acb7ad337c1af8f21be46a2cfbff125bd293017ad00"
 dependencies = [
  "libc",
  "projectm-sys",
@@ -205,7 +207,7 @@ name = "projectm_sdl"
 version = "0.1.0"
 dependencies = [
  "libc",
- "projectm-rs",
+ "projectm",
  "sdl3",
 ]
 

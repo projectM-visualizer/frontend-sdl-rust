@@ -1,5 +1,5 @@
 use crate::app::App;
-use projectm_rs::core::Projectm;
+use projectm::core::Projectm;
 use std::path::Path;
 
 pub type FrameRate = u32;

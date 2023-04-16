@@ -1,7 +1,7 @@
 use std::sync::{Arc, Mutex};
 
-use projectm_rs::core::{ProjectMHandle, Projectm};
-use sdl2::video::GLProfile;
+use projectm::core::{ProjectMHandle, Projectm};
+use sdl3::video::GLProfile;
 
 pub mod audio;
 pub mod config;
@@ -15,12 +15,12 @@ pub type ProjectMWrapped = Arc<Mutex<ProjectMHandle>>;
 /// Application state
 pub struct App {
     pm: ProjectMWrapped,
-    playlist: projectm_rs::playlist::Playlist,
-    sdl_context: sdl2::Sdl,
-    window: sdl2::video::Window,
+    playlist: projectm::playlist::Playlist,
+    sdl_context: sdl3::Sdl,
+    window: sdl3::video::Window,
     config: config::Config,
     audio: audio::Audio,
-    _gl_context: sdl2::video::GLContext,
+    _gl_context: sdl3::video::GLContext,
 }
 
 pub fn default_config() -> config::Config {
@@ -30,7 +30,7 @@ pub fn default_config() -> config::Config {
 impl App {
     pub fn new(config: Option<crate::app::config::Config>) -> Self {
         // setup sdl
-        let sdl_context = sdl2::init().unwrap();
+        let sdl_context = sdl3::init().unwrap();
         let video_subsystem = sdl_context.video().unwrap();
 
         // request GL version
@@ -64,7 +64,7 @@ impl App {
         let pm = Projectm::create();
 
         // and a preset playlist
-        let playlist = projectm_rs::playlist::Playlist::create(pm);
+        let playlist = projectm::playlist::Playlist::create(pm);
 
         // get/set window size
         let (width, height) = window.drawable_size(); // highDPI aware
