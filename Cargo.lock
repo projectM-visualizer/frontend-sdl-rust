@@ -173,9 +173,9 @@ checksum = "5b40af805b3121feab8a3c29f04d8ad262fa8e0561883e7653e024ae4479e6de"
 
 [[package]]
 name = "proc-macro2"
-version = "1.0.55"
+version = "1.0.59"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1d0dd4be24fcdcfeaa12a432d588dc59bbad6cad3510c67e74a2b6b2fc950564"
+checksum = "6aeca18b86b413c660b781aa319e4e2648a3e6f9eadc9b47e9038e6fe9f3451b"
 dependencies = [
  "unicode-ident",
 ]
@@ -183,6 +183,8 @@ dependencies = [
 [[package]]
 name = "projectm"
 version = "1.0.5"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "0a14398d9b43666e48c94acb7ad337c1af8f21be46a2cfbff125bd293017ad00"
 dependencies = [
  "libc",
  "projectm-sys",
@@ -202,7 +204,7 @@ dependencies = [
 
 [[package]]
 name = "projectm_sdl"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "libc",
  "projectm",
@@ -211,9 +213,9 @@ dependencies = [
 
 [[package]]
 name = "quote"
-version = "1.0.26"
+version = "1.0.28"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4424af4bf778aae2051a77b60283332f386554255d722233d09fbfc7e30da2fc"
+checksum = "1b9ab9c7eadfd8df19006f1cf1a4aed13540ed5cbc047010ece5826e10825488"
 dependencies = [
  "proc-macro2",
 ]
@@ -271,7 +273,9 @@ checksum = "08d43f7aa6b08d49f382cde6a7982047c3426db949b1424bc4b7ec9ae12c6ce2"
 
 [[package]]
 name = "sdl3"
-version = "0.1.0"
+version = "0.2.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "814de6873aef8b24ffe2e10a3436f3f903f09436656c5d729b434746116c42bb"
 dependencies = [
  "bitflags",
  "lazy_static",
@@ -281,7 +285,9 @@ dependencies = [
 
 [[package]]
 name = "sdl3-sys"
-version = "0.0.2+sdl3-dev-2023-05-13"
+version = "0.0.5+sdl3-dev-2023-06-04"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "db37ff748dc3b771dce9b737e2ae71e99e595881f798611375f222e5caf6c4f6"
 dependencies = [
  "cfg-if",
  "libc",
