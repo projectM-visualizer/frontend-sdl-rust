@@ -27,6 +27,10 @@ pub struct Audio {
 impl Audio {
     pub fn new(sdl_context: &sdl3::Sdl, projectm: ProjectMWrapped) -> Self {
         let audio_subsystem = sdl_context.audio().unwrap();
+        println!(
+            "Using audio driver: {}",
+            audio_subsystem.current_audio_driver()
+        );
 
         Self {
             is_capturing: false,
@@ -44,7 +48,7 @@ impl Audio {
         self.frame_rate = frame_rate.into();
 
         #[cfg(not(feature = "dummy_audio"))]
-        self.begin_audio_capture();
+        self.begin_audio_capture(0);
     }
 
     pub fn list_devices(&self) {
@@ -60,12 +64,12 @@ impl Audio {
     pub fn capture_device(&mut self, device_index: AudioDeviceIndex) {
         self.stop_audio_capture();
         self.device_index = device_index;
-        self.begin_audio_capture();
+        self.begin_audio_capture(device_index);
     }
 
-    pub fn get_current_device_name(&self) -> String {
+    pub fn get_device_name(&self, device_index: AudioDeviceIndex) -> String {
         self.audio_subsystem
-            .audio_capture_device_name(self.device_index)
+            .audio_capture_device_name(device_index)
             .expect("could not get audio device")
     }
 
@@ -99,7 +103,7 @@ impl Audio {
             .collect::<Vec<_>>()
     }
 
-    pub fn begin_audio_capture(&mut self) {
+    pub fn begin_audio_capture(&mut self, device_index: AudioDeviceIndex) {
         let sample_rate: u32 = 44100;
         let frame_rate = self.frame_rate.unwrap();
 
@@ -120,7 +124,7 @@ impl Audio {
         };
 
         // open audio device for capture
-        let device_name = self.get_current_device_name();
+        let device_name = self.get_device_name(device_index);
         let audio_device = match self
             .audio_subsystem // sdl
             .open_capture(device_name.as_str(), &desired_spec, |_spec| {
@@ -150,7 +154,7 @@ impl Audio {
     }
 
     pub fn stop_audio_capture(&mut self) {
-        let current_device_name = self.get_current_device_name();
+        let current_device_name = self.get_device_name(self.device_index);
         println!("Stopping audio capture for device {}", current_device_name);
 
         println!(
@@ -165,6 +169,7 @@ impl Audio {
         device.pause();
 
         self.is_capturing = false;
+        drop(device);
     }
 }
 

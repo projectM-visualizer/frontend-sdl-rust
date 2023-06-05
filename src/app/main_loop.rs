@@ -111,10 +111,12 @@ impl App {
 
             if frame_rate > 0 {
                 // calculate frame time
-                let frame_time = timer.ticks() - start_time;
-                if frame_time < 1000 / frame_rate {
+                let frame_time: u32 = (timer.ticks() - start_time).try_into().unwrap();
+                // what do we need to hit target frame rate?
+                let delay_needed: u32 = 1000 / frame_rate - frame_time;
+                if delay_needed > 0 {
                     // sleep the remaining frame time
-                    timer.delay(1000 / frame_rate - frame_time);
+                    timer.delay(delay_needed);
                 }
             }
         }

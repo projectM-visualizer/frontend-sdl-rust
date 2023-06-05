@@ -183,8 +183,6 @@ dependencies = [
 [[package]]
 name = "projectm"
 version = "1.0.5"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0a14398d9b43666e48c94acb7ad337c1af8f21be46a2cfbff125bd293017ad00"
 dependencies = [
  "libc",
  "projectm-sys",
@@ -273,8 +271,7 @@ checksum = "08d43f7aa6b08d49f382cde6a7982047c3426db949b1424bc4b7ec9ae12c6ce2"
 
 [[package]]
 name = "sdl3"
-version = "0.0.2"
-source = "git+https://github.com/revmischa/sdl3-rs.git#70254bfd9bd64b7ba637f9fd648e1c5cd51d7699"
+version = "0.1.0"
 dependencies = [
  "bitflags",
  "lazy_static",
@@ -284,8 +281,7 @@ dependencies = [
 
 [[package]]
 name = "sdl3-sys"
-version = "0.0.2"
-source = "git+https://github.com/revmischa/sdl3-rs.git#70254bfd9bd64b7ba637f9fd648e1c5cd51d7699"
+version = "0.0.2+sdl3-dev-2023-05-13"
 dependencies = [
  "cfg-if",
  "libc",
