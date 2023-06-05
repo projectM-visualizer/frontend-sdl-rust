@@ -8,11 +8,12 @@ rust-version = "1.68.2"
 
 [dependencies]
 libc = "*"
-# sdl3 = { git = "https://github.com/revmischa/sdl3-rs.git" }
-sdl3 = { path = "../../sdl3-rs" }
-# projectm = "1.0.5"
-projectm = { path = "../projectm-rs" }
+projectm = "1.0.5"
+# projectm = { path = "../projectm-rs" }
 #projectm = { git = "https://github.com/projectM-visualizer/projectm" }
+sdl3 = { git = "https://github.com/revmischa/sdl3-rs.git", features = ["use-bindgen"] }
+# sdl3 = { path = "../../sdl3-rs" }
+
 # gl = "0.14.0"
 
 [features]
