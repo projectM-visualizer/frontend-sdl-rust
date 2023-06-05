@@ -81,7 +81,11 @@ impl App {
                     // Next audio capture input device (ctl-I, cmd-I)
                     Event::KeyUp {
                         keycode: Some(Keycode::I),
-                        keymod: sdl2::keyboard::Mod::LCTRLMOD,
+                        keymod:
+                            sdl2::keyboard::Mod::LCTRLMOD
+                            | sdl2::keyboard::Mod::RCTRLMOD
+                            | sdl2::keyboard::Mod::LGUIMOD
+                            | sdl2::keyboard::Mod::RGUIMOD,
                         ..
                     } => {
                         self.audio.open_next_device();
@@ -97,7 +101,10 @@ impl App {
             dummy_audio::generate_random_audio_data(self.pm);
 
             // render a frame
-            Projectm::render_frame(self.pm);
+            {
+                let pm = *self.pm.lock().unwrap();
+                Projectm::render_frame(pm);
+            }
 
             // swap buffers
             self.window.gl_swap_window();

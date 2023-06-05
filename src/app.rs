@@ -1,3 +1,5 @@
+use std::sync::{Arc, Mutex};
+
 use projectm_rs::core::{ProjectMHandle, Projectm};
 use sdl2::video::GLProfile;
 
@@ -7,9 +9,12 @@ pub mod main_loop;
 pub mod playlist;
 pub mod video;
 
+/// Thread-safe wrapper around the projectM instance.
+pub type ProjectMWrapped = Arc<Mutex<ProjectMHandle>>;
+
 /// Application state
 pub struct App {
-    pm: ProjectMHandle,
+    pm: ProjectMWrapped,
     playlist: projectm_rs::playlist::Playlist,
     sdl_context: sdl2::Sdl,
     window: sdl2::video::Window,
@@ -65,11 +70,14 @@ impl App {
         let (width, height) = window.drawable_size(); // highDPI aware
         Projectm::set_window_size(pm, width.try_into().unwrap(), height.try_into().unwrap());
 
+        // create a mutex to protect the projectM instance
+        let pm = Arc::new(Mutex::new(pm));
+
         // initialize audio
-        let audio = audio::Audio::new(&sdl_context, pm);
+        let audio = audio::Audio::new(&sdl_context, pm.clone());
 
         Self {
-            pm,
+            pm: pm.clone(),
             playlist,
             sdl_context,
             window,
