@@ -12,7 +12,7 @@ projectm = "1.0.5"
 # projectm = { path = "../projectm-rs" }
 #projectm = { git = "https://github.com/projectM-visualizer/projectm" }
 # sdl3 = { git = "https://github.com/revmischa/sdl3-rs.git", features = ["use-bindgen"] }
-sdl3 = "0.2.0"
+sdl3 = "0.5.0"
 # sdl3 = { path = "../../sdl3-rs" }
 
 # gl = "0.14.0"
