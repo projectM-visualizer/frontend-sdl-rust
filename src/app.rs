@@ -1,6 +1,4 @@
-use std::sync::{Arc, Mutex};
-
-use projectm::core::{ProjectMHandle, Projectm};
+use projectm::core::ProjectM;
 use sdl3::video::GLProfile;
 
 pub mod audio;
@@ -9,12 +7,13 @@ pub mod main_loop;
 pub mod playlist;
 pub mod video;
 
-/// Thread-safe wrapper around the projectM instance.
-pub type ProjectMWrapped = Arc<Mutex<ProjectMHandle>>;
+pub type ProjectMWrapped = ProjectM;
+
+use std::rc::Rc;
 
 /// Application state
 pub struct App {
-    pm: ProjectMWrapped,
+    pm: Rc<ProjectMWrapped>,
     playlist: projectm::playlist::Playlist,
     sdl_context: sdl3::Sdl,
     window: sdl3::video::Window,
@@ -55,8 +54,8 @@ impl App {
         println!("Using video driver: {}", driver);
         let display_id = video_subsystem.get_primary_display_id();
         let display_mode = video_subsystem.current_display_mode(display_id).unwrap();
-        let window_width = 100; // display_mode.w as u32;
-        let window_height = 100; // display_mode.h as u32;
+        let window_width = display_mode.w as u32;
+        let window_height = display_mode.h as u32;
         println!(
             "Display {} is {}x{}",
             display_index, window_width, window_height
@@ -75,23 +74,20 @@ impl App {
         window.gl_make_current(&gl_context).unwrap();
 
         // initialize projectM
-        let pm = Projectm::create();
+        let pm = Rc::new(ProjectMWrapped::create());
 
         // and a preset playlist
-        let playlist = projectm::playlist::Playlist::create(pm);
+        let playlist = projectm::playlist::Playlist::create(&pm);
 
         // get/set window size
-        let (width, height) = window.size(); // TODO: need high DPI support here https://github.com/libsdl-org/SDL/issues/7134
-        Projectm::set_window_size(pm, width.try_into().unwrap(), height.try_into().unwrap());
-
-        // create a mutex to protect the projectM instance
-        let pm = Arc::new(Mutex::new(pm));
+        let (width, height) = window.size(); // TODO: handle pixel density https://github.com/libsdl-org/SDL/blob/main/docs/README-highdpi.md
+        pm.set_window_size(width.try_into().unwrap(), height.try_into().unwrap());
 
         // initialize audio
-        let audio = audio::Audio::new(&sdl_context, pm.clone());
+        let audio = audio::Audio::new(&sdl_context, Rc::clone(&pm));
 
         Self {
-            pm: pm.clone(),
+            pm,
             playlist,
             sdl_context,
             window,

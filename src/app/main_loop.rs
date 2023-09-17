@@ -1,4 +1,3 @@
-use projectm::core::Projectm;
 use sdl3::event::Event;
 use sdl3::keyboard::Keycode;
 
@@ -101,22 +100,20 @@ impl App {
             dummy_audio::generate_random_audio_data(self.pm);
 
             // render a frame
-            {
-                let pm = *self.pm.lock().unwrap();
-                Projectm::render_frame(pm);
-            }
+            self.pm.render_frame();
 
             // swap buffers
             self.window.gl_swap_window();
 
             if frame_rate > 0 {
                 // calculate frame time
-                let frame_time: u32 = (timer.ticks() - start_time).try_into().unwrap();
+                let frame_time: i32 = (timer.ticks() - start_time).try_into().unwrap();
                 // what do we need to hit target frame rate?
-                let delay_needed: u32 = 1000 / frame_rate - frame_time;
+                let frame_rate_i32: i32 = frame_rate.try_into().unwrap();
+                let delay_needed: i32 = 1000 / frame_rate_i32 - frame_time;
                 if delay_needed > 0 {
                     // sleep the remaining frame time
-                    timer.delay(delay_needed);
+                    timer.delay(delay_needed.try_into().unwrap());
                 }
             }
         }
