@@ -185,8 +185,6 @@ impl AudioCallback for AudioCaptureCallback {
     // we are receiving some chunk of audio data
     // we need to pass it to projectm
     fn callback(&mut self, out: &mut [SampleFormat]) {
-        let pm = self.pm.pcm_add_float(out.to_vec(), 2);
-        // pm.pcm_add_float(out.to_vec(), 2);
-        // projectm::core::Projectm::pcm_add_float(pm, out.to_vec(), 2);
+        self.pm.pcm_add_float(out.to_vec(), 2);
     }
 }
