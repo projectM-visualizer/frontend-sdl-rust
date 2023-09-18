@@ -1,5 +1,7 @@
 use projectm::core::ProjectM;
-use sdl3::video::GLProfile;
+use sdl3::video::{GLProfile, WindowPos};
+use std::convert::TryInto;
+use std::rc::Rc;
 
 pub mod audio;
 pub mod config;
@@ -7,13 +9,11 @@ pub mod main_loop;
 pub mod playlist;
 pub mod video;
 
-pub type ProjectMWrapped = ProjectM;
-
-use std::rc::Rc;
+pub type ProjectMWrapped = Rc<ProjectM>;
 
 /// Application state
 pub struct App {
-    pm: Rc<ProjectMWrapped>,
+    pm: ProjectMWrapped,
     playlist: projectm::playlist::Playlist,
     sdl_context: sdl3::Sdl,
     window: sdl3::video::Window,
@@ -48,23 +48,11 @@ impl App {
         assert_eq!(gl_attr.context_version(), (3, 3));
 
         // create window
-        // get screen dimensions
-        let display_index = 0;
-        let driver = video_subsystem.current_video_driver();
-        println!("Using video driver: {}", driver);
-        let display_id = video_subsystem.get_primary_display_id();
-        let display_mode = video_subsystem.current_display_mode(display_id).unwrap();
-        let window_width = display_mode.w as u32;
-        let window_height = display_mode.h as u32;
-        println!(
-            "Display {} is {}x{}",
-            display_index, window_width, window_height
-        );
         let window = video_subsystem
-            .window("ProjectM", window_width, window_height)
+            .window("ProjectM", 0, 0)
             .opengl()
             .maximized()
-            .position_centered()
+            .fullscreen()
             // .allow_highdpi()
             .build()
             .expect("could not initialize video subsystem");
@@ -74,13 +62,13 @@ impl App {
         window.gl_make_current(&gl_context).unwrap();
 
         // initialize projectM
-        let pm = Rc::new(ProjectMWrapped::create());
+        let pm = Rc::new(ProjectM::create());
 
         // and a preset playlist
         let playlist = projectm::playlist::Playlist::create(&pm);
 
         // get/set window size
-        let (width, height) = window.size(); // TODO: handle pixel density https://github.com/libsdl-org/SDL/blob/main/docs/README-highdpi.md
+        let (width, height) = window.size_in_pixels();
         pm.set_window_size(width.try_into().unwrap(), height.try_into().unwrap());
 
         // initialize audio

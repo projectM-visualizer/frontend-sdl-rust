@@ -20,12 +20,12 @@ pub struct Audio {
     is_capturing: bool,
     frame_rate: Option<FrameRate>,
     capturing_device: Option<Box<AudioDevice<AudioCaptureCallback>>>,
-    projectm: Rc<ProjectMWrapped>,
+    projectm: ProjectMWrapped,
 }
 
 /// Wrapper around the audio subsystem to capture audio and pass it to projectM.
 impl Audio {
-    pub fn new(sdl_context: &sdl3::Sdl, projectm: Rc<ProjectMWrapped>) -> Self {
+    pub fn new(sdl_context: &sdl3::Sdl, projectm: ProjectMWrapped) -> Self {
         let audio_subsystem = sdl_context.audio().unwrap();
         println!(
             "Using audio driver: {}",
@@ -174,7 +174,7 @@ impl Audio {
 struct AudioCaptureCallback {
     // we need to keep a reference to the projectm instance to
     // add the audio data to it
-    pm: Rc<ProjectMWrapped>,
+    pm: ProjectMWrapped,
 }
 unsafe impl Send for AudioCaptureCallback {}
 unsafe impl Sync for AudioCaptureCallback {}
