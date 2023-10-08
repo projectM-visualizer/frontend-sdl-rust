@@ -1,18 +1,17 @@
-use projectm::core::{ProjectMHandle, Projectm};
+use crate::app::ProjectMWrapped;
 
 #[allow(dead_code)]
-pub fn generate_random_audio_data(projectm_handle: ProjectMHandle) {
-    let mut pcm_data: [[libc::c_short; 512]; 2] = [[0; 512]; 2];
-    let mut i: libc::c_int = 0 as libc::c_int;
-    while i < 512 as libc::c_int {
-        if i % 2 as libc::c_int == 1 as libc::c_int {
-            pcm_data[0 as libc::c_int as usize][i as usize] =
-                -(pcm_data[0 as libc::c_int as usize][i as usize] as libc::c_int) as libc::c_short;
-            pcm_data[1 as libc::c_int as usize][i as usize] =
-                -(pcm_data[1 as libc::c_int as usize][i as usize] as libc::c_int) as libc::c_short
+fn generate_random_audio_data(pm: &ProjectMWrapped) {
+    // Create a Vec<i16> with 1024 elements
+    // two channels of 512 samples each
+    let mut pcm_data: Vec<i16> = vec![0; 1024];
+
+    for i in 0..512 {
+        if i % 2 == 1 {
+            pcm_data[i * 2] = -(pcm_data[i * 2] as i32) as i16;
+            pcm_data[i * 2 + 1] = -(pcm_data[i * 2 + 1] as i32) as i16;
         }
-        i += 1
     }
 
-    Projectm::pcm_add_int16(projectm_handle, vec![pcm_data[0][0]], 2)
+    pm.pcm_add_int16(pcm_data, 2);
 }

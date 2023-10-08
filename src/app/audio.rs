@@ -1,10 +1,10 @@
-use projectm::core::ProjectMHandle;
+use projectm::core::ProjectM;
 use sdl3::audio::{AudioCallback, AudioDevice, AudioSpecDesired};
-use std::sync::Arc;
-use std::sync::Mutex;
 
 use super::config::FrameRate;
 use super::ProjectMWrapped;
+
+use std::rc::Rc;
 
 type AudioDeviceIndex = u32;
 type SampleFormat = f32; // format of audio samples
@@ -110,9 +110,7 @@ impl Audio {
         // how many samples to capture at a time
         // should be enough for 1 frame or less
         // should not be larger than max_samples / channels
-        let max_samples: usize = projectm::core::Projectm::pcm_get_max_samples()
-            .try_into()
-            .unwrap();
+        let max_samples: usize = ProjectM::pcm_get_max_samples().try_into().unwrap();
         let samples_per_frame = (sample_rate / frame_rate) as usize;
         let buffer_size = std::cmp::min(max_samples / 2, samples_per_frame);
         println!("Buffer size: {}", buffer_size);
@@ -135,7 +133,7 @@ impl Audio {
 
                 // return callback fn
                 AudioCaptureCallback {
-                    pm: self.projectm.clone(),
+                    pm: Rc::clone(&self.projectm),
                 }
             }) {
             Ok(device) => device,
@@ -176,7 +174,7 @@ impl Audio {
 struct AudioCaptureCallback {
     // we need to keep a reference to the projectm instance to
     // add the audio data to it
-    pm: Arc<Mutex<ProjectMHandle>>,
+    pm: ProjectMWrapped,
 }
 unsafe impl Send for AudioCaptureCallback {}
 unsafe impl Sync for AudioCaptureCallback {}
@@ -187,7 +185,6 @@ impl AudioCallback for AudioCaptureCallback {
     // we are receiving some chunk of audio data
     // we need to pass it to projectm
     fn callback(&mut self, out: &mut [SampleFormat]) {
-        let pm = *self.pm.lock().unwrap();
-        projectm::core::Projectm::pcm_add_float(pm, out.to_vec(), 2);
+        self.pm.pcm_add_float(out.to_vec(), 2);
     }
 }

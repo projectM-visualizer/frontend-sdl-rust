@@ -1,7 +1,7 @@
-use std::sync::{Arc, Mutex};
-
-use projectm::core::{ProjectMHandle, Projectm};
-use sdl3::video::GLProfile;
+use projectm::core::ProjectM;
+use sdl3::video::{GLProfile, WindowPos};
+use std::convert::TryInto;
+use std::rc::Rc;
 
 pub mod audio;
 pub mod config;
@@ -9,8 +9,7 @@ pub mod main_loop;
 pub mod playlist;
 pub mod video;
 
-/// Thread-safe wrapper around the projectM instance.
-pub type ProjectMWrapped = Arc<Mutex<ProjectMHandle>>;
+pub type ProjectMWrapped = Rc<ProjectM>;
 
 /// Application state
 pub struct App {
@@ -49,23 +48,11 @@ impl App {
         assert_eq!(gl_attr.context_version(), (3, 3));
 
         // create window
-        // get screen dimensions
-        let display_index = 0;
-        let driver = video_subsystem.current_video_driver();
-        println!("Using video driver: {}", driver);
-        let display_id = video_subsystem.get_primary_display_id();
-        let display_mode = video_subsystem.current_display_mode(display_id).unwrap();
-        let window_width = 100; // display_mode.w as u32;
-        let window_height = 100; // display_mode.h as u32;
-        println!(
-            "Display {} is {}x{}",
-            display_index, window_width, window_height
-        );
         let window = video_subsystem
-            .window("ProjectM", window_width, window_height)
+            .window("ProjectM", 0, 0)
             .opengl()
             .maximized()
-            .position_centered()
+            .fullscreen()
             // .allow_highdpi()
             .build()
             .expect("could not initialize video subsystem");
@@ -75,23 +62,20 @@ impl App {
         window.gl_make_current(&gl_context).unwrap();
 
         // initialize projectM
-        let pm = Projectm::create();
+        let pm = Rc::new(ProjectM::create());
 
         // and a preset playlist
-        let playlist = projectm::playlist::Playlist::create(pm);
+        let playlist = projectm::playlist::Playlist::create(&pm);
 
         // get/set window size
-        let (width, height) = window.size(); // TODO: need high DPI support here https://github.com/libsdl-org/SDL/issues/7134
-        Projectm::set_window_size(pm, width.try_into().unwrap(), height.try_into().unwrap());
-
-        // create a mutex to protect the projectM instance
-        let pm = Arc::new(Mutex::new(pm));
+        let (width, height) = window.size_in_pixels();
+        pm.set_window_size(width.try_into().unwrap(), height.try_into().unwrap());
 
         // initialize audio
-        let audio = audio::Audio::new(&sdl_context, pm.clone());
+        let audio = audio::Audio::new(&sdl_context, Rc::clone(&pm));
 
         Self {
-            pm: pm.clone(),
+            pm,
             playlist,
             sdl_context,
             window,

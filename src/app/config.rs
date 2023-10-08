@@ -1,5 +1,4 @@
 use crate::app::App;
-use projectm::core::Projectm;
 use std::path::Path;
 
 pub type FrameRate = u32;
@@ -57,7 +56,7 @@ impl Default for Config {
 
 impl App {
     pub fn load_config(&self, config: &Config) {
-        let pm = *self.pm.lock().unwrap();
+        let pm = &self.pm;
 
         // load presets if provided
         if let Some(preset_path) = &config.preset_path {
@@ -66,24 +65,24 @@ impl App {
 
         // set frame rate if provided
         if let Some(frame_rate) = config.frame_rate {
-            Projectm::set_fps(pm, frame_rate)
+            pm.set_fps(frame_rate);
         }
 
         // load textures if provided
         if let Some(texture_path) = &config.texture_path {
             let mut paths: Vec<String> = Vec::new();
             paths.push(texture_path.into());
-            Projectm::set_texture_search_paths(pm, &paths, 1);
+            pm.set_texture_search_paths(&paths, 1);
         }
 
         // set beat sensitivity if provided
         if let Some(beat_sensitivity) = config.beat_sensitivity {
-            Projectm::set_beat_sensitivity(pm, beat_sensitivity);
+            pm.set_beat_sensitivity(beat_sensitivity);
         }
 
         // set preset duration if provided
         if let Some(preset_duration) = config.preset_duration {
-            Projectm::set_preset_duration(pm, preset_duration);
+            pm.set_preset_duration(preset_duration);
         }
 
         // set preset shuffle mode
@@ -91,7 +90,6 @@ impl App {
     }
 
     pub fn get_frame_rate(&self) -> FrameRate {
-        let pm = *self.pm.lock().unwrap();
-        Projectm::get_fps(pm)
+        self.pm.get_fps()
     }
 }
