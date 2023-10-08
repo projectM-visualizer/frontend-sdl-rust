@@ -1,4 +1,4 @@
-use projectm_rs::core::{ProjectMHandle, Projectm};
+use projectm::core::{ProjectMHandle, Projectm};
 
 #[allow(dead_code)]
 pub fn generate_random_audio_data(projectm_handle: ProjectMHandle) {

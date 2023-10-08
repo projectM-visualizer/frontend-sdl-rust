@@ -1,6 +1,6 @@
-use projectm_rs::core::Projectm;
-use sdl2::event::Event;
-use sdl2::keyboard::Keycode;
+use projectm::core::Projectm;
+use sdl3::event::Event;
+use sdl3::keyboard::Keycode;
 
 use crate::app::App;
 
@@ -14,7 +14,7 @@ impl App {
 
         // events
         let mut event_pump = self.sdl_context.event_pump().unwrap();
-        let mut timer = self.sdl_context.timer().unwrap();
+        let timer = self.sdl_context.timer().unwrap();
 
         // renderLoop
         'running: loop {
@@ -82,10 +82,10 @@ impl App {
                     Event::KeyUp {
                         keycode: Some(Keycode::I),
                         keymod:
-                            sdl2::keyboard::Mod::LCTRLMOD
-                            | sdl2::keyboard::Mod::RCTRLMOD
-                            | sdl2::keyboard::Mod::LGUIMOD
-                            | sdl2::keyboard::Mod::RGUIMOD,
+                            sdl3::keyboard::Mod::LCTRLMOD
+                            | sdl3::keyboard::Mod::RCTRLMOD
+                            | sdl3::keyboard::Mod::LGUIMOD
+                            | sdl3::keyboard::Mod::RGUIMOD,
                         ..
                     } => {
                         self.audio.open_next_device();
@@ -111,10 +111,12 @@ impl App {
 
             if frame_rate > 0 {
                 // calculate frame time
-                let frame_time = timer.ticks() - start_time;
-                if frame_time < 1000 / frame_rate {
+                let frame_time: u32 = (timer.ticks() - start_time).try_into().unwrap();
+                // what do we need to hit target frame rate?
+                let delay_needed: u32 = 1000 / frame_rate - frame_time;
+                if delay_needed > 0 {
                     // sleep the remaining frame time
-                    timer.delay(1000 / frame_rate - frame_time);
+                    timer.delay(delay_needed);
                 }
             }
         }

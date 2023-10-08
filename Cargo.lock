@@ -173,18 +173,18 @@ checksum = "5b40af805b3121feab8a3c29f04d8ad262fa8e0561883e7653e024ae4479e6de"
 
 [[package]]
 name = "proc-macro2"
-version = "1.0.55"
+version = "1.0.59"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1d0dd4be24fcdcfeaa12a432d588dc59bbad6cad3510c67e74a2b6b2fc950564"
+checksum = "6aeca18b86b413c660b781aa319e4e2648a3e6f9eadc9b47e9038e6fe9f3451b"
 dependencies = [
  "unicode-ident",
 ]
 
 [[package]]
-name = "projectm-rs"
+name = "projectm"
 version = "1.0.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6c7adc99c8bb6bfc138265b279ca7d22f1d896b474e0c925abf6f3723403d09d"
+checksum = "0a14398d9b43666e48c94acb7ad337c1af8f21be46a2cfbff125bd293017ad00"
 dependencies = [
  "libc",
  "projectm-sys",
@@ -204,18 +204,18 @@ dependencies = [
 
 [[package]]
 name = "projectm_sdl"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "libc",
- "projectm-rs",
- "sdl2",
+ "projectm",
+ "sdl3",
 ]
 
 [[package]]
 name = "quote"
-version = "1.0.26"
+version = "1.0.28"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4424af4bf778aae2051a77b60283332f386554255d722233d09fbfc7e30da2fc"
+checksum = "1b9ab9c7eadfd8df19006f1cf1a4aed13540ed5cbc047010ece5826e10825488"
 dependencies = [
  "proc-macro2",
 ]
@@ -272,22 +272,22 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "08d43f7aa6b08d49f382cde6a7982047c3426db949b1424bc4b7ec9ae12c6ce2"
 
 [[package]]
-name = "sdl2"
-version = "0.35.2"
+name = "sdl3"
+version = "0.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f7959277b623f1fb9e04aea73686c3ca52f01b2145f8ea16f4ff30d8b7623b1a"
+checksum = "041ee515e152266b6d4ade22db39b0e09486076d06e0eb7ad5cc707d4856ca4f"
 dependencies = [
  "bitflags",
  "lazy_static",
  "libc",
- "sdl2-sys",
+ "sdl3-sys",
 ]
 
 [[package]]
-name = "sdl2-sys"
-version = "0.35.2"
+name = "sdl3-sys"
+version = "0.0.6+sdl3-dev-2023-07-31"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e3586be2cf6c0a8099a79a12b4084357aa9b3e0b0d7980e3b67aaf7a9d55f9f0"
+checksum = "c9846a96256cb800f754bef64805689a4c75b2a1a6d855064c10321075034673"
 dependencies = [
  "cfg-if",
  "libc",

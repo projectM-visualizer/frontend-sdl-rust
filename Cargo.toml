@@ -1,6 +1,6 @@
 [package]
 name = "projectm_sdl"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2021"
 rust-version = "1.68.2"
 
@@ -8,12 +8,15 @@ rust-version = "1.68.2"
 
 [dependencies]
 libc = "*"
-sdl2 = "0.35"
-projectm-rs = "1.0.5"
-# projectm-rs = { path = "../projectm-rs" }
-#projectm-rs = { git = "https://github.com/projectM-visualizer/projectm-rs" }
+projectm = "1.0.5"
+# projectm = { path = "../projectm-rs" }
+#projectm = { git = "https://github.com/projectM-visualizer/projectm" }
+# sdl3 = { git = "https://github.com/revmischa/sdl3-rs.git", features = ["use-bindgen"] }
+sdl3 = "0.5.0"
+# sdl3 = { path = "../../sdl3-rs" }
 
 # gl = "0.14.0"
 
 [features]
+static-link = ["sdl3/static-link"]
 dummy_audio = []

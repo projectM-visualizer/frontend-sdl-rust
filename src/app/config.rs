@@ -1,5 +1,5 @@
 use crate::app::App;
-use projectm_rs::core::Projectm;
+use projectm::core::Projectm;
 use std::path::Path;
 
 pub type FrameRate = u32;
@@ -32,7 +32,7 @@ impl Default for Config {
         // use /usr/local/share/projectM if it exists, otherwise use local paths
         let resource_dir = "/usr/local/share/projectM";
         let dir_exists = Path::new(&resource_dir).exists();
-        let preset_path = if dir_exists {
+        let preset_path = if dir_exists && false {
             String::from(resource_dir) + "/presets"
         } else {
             // just test presets

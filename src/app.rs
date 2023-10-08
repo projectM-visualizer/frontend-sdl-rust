@@ -1,7 +1,7 @@
 use std::sync::{Arc, Mutex};
 
-use projectm_rs::core::{ProjectMHandle, Projectm};
-use sdl2::video::GLProfile;
+use projectm::core::{ProjectMHandle, Projectm};
+use sdl3::video::GLProfile;
 
 pub mod audio;
 pub mod config;
@@ -15,12 +15,12 @@ pub type ProjectMWrapped = Arc<Mutex<ProjectMHandle>>;
 /// Application state
 pub struct App {
     pm: ProjectMWrapped,
-    playlist: projectm_rs::playlist::Playlist,
-    sdl_context: sdl2::Sdl,
-    window: sdl2::video::Window,
+    playlist: projectm::playlist::Playlist,
+    sdl_context: sdl3::Sdl,
+    window: sdl3::video::Window,
     config: config::Config,
     audio: audio::Audio,
-    _gl_context: sdl2::video::GLContext,
+    _gl_context: sdl3::video::GLContext,
 }
 
 pub fn default_config() -> config::Config {
@@ -30,7 +30,13 @@ pub fn default_config() -> config::Config {
 impl App {
     pub fn new(config: Option<crate::app::config::Config>) -> Self {
         // setup sdl
-        let sdl_context = sdl2::init().unwrap();
+        let sdl_context = sdl3::init().unwrap();
+        // print SDL version
+        let version = sdl3::version::version();
+        println!(
+            "SDL version: {}.{}.{}",
+            version.major, version.minor, version.patch
+        );
         let video_subsystem = sdl_context.video().unwrap();
 
         // request GL version
@@ -45,14 +51,22 @@ impl App {
         // create window
         // get screen dimensions
         let display_index = 0;
-        let display_mode = video_subsystem.desktop_display_mode(display_index).unwrap();
-        let window_width = display_mode.w as u32;
-        let window_height = display_mode.h as u32;
+        let driver = video_subsystem.current_video_driver();
+        println!("Using video driver: {}", driver);
+        let display_id = video_subsystem.get_primary_display_id();
+        let display_mode = video_subsystem.current_display_mode(display_id).unwrap();
+        let window_width = 100; // display_mode.w as u32;
+        let window_height = 100; // display_mode.h as u32;
+        println!(
+            "Display {} is {}x{}",
+            display_index, window_width, window_height
+        );
         let window = video_subsystem
             .window("ProjectM", window_width, window_height)
             .opengl()
+            .maximized()
             .position_centered()
-            .allow_highdpi()
+            // .allow_highdpi()
             .build()
             .expect("could not initialize video subsystem");
 
@@ -64,10 +78,10 @@ impl App {
         let pm = Projectm::create();
 
         // and a preset playlist
-        let playlist = projectm_rs::playlist::Playlist::create(pm);
+        let playlist = projectm::playlist::Playlist::create(pm);
 
         // get/set window size
-        let (width, height) = window.drawable_size(); // highDPI aware
+        let (width, height) = window.size(); // TODO: need high DPI support here https://github.com/libsdl-org/SDL/issues/7134
         Projectm::set_window_size(pm, width.try_into().unwrap(), height.try_into().unwrap());
 
         // create a mutex to protect the projectM instance

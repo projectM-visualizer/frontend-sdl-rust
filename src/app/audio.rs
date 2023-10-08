@@ -1,5 +1,5 @@
-use projectm_rs::core::ProjectMHandle;
-use sdl2::audio::{AudioCallback, AudioDevice, AudioSpecDesired};
+use projectm::core::ProjectMHandle;
+use sdl3::audio::{AudioCallback, AudioDevice, AudioSpecDesired};
 use std::sync::Arc;
 use std::sync::Mutex;
 
@@ -15,7 +15,7 @@ pub struct AudioCaptureDevice {
 }
 
 pub struct Audio {
-    audio_subsystem: sdl2::AudioSubsystem,
+    audio_subsystem: sdl3::AudioSubsystem,
     device_index: AudioDeviceIndex,
     is_capturing: bool,
     frame_rate: Option<FrameRate>,
@@ -25,8 +25,12 @@ pub struct Audio {
 
 /// Wrapper around the audio subsystem to capture audio and pass it to projectM.
 impl Audio {
-    pub fn new(sdl_context: &sdl2::Sdl, projectm: ProjectMWrapped) -> Self {
+    pub fn new(sdl_context: &sdl3::Sdl, projectm: ProjectMWrapped) -> Self {
         let audio_subsystem = sdl_context.audio().unwrap();
+        println!(
+            "Using audio driver: {}",
+            audio_subsystem.current_audio_driver()
+        );
 
         Self {
             is_capturing: false,
@@ -44,7 +48,7 @@ impl Audio {
         self.frame_rate = frame_rate.into();
 
         #[cfg(not(feature = "dummy_audio"))]
-        self.begin_audio_capture();
+        self.begin_audio_capture(0);
     }
 
     pub fn list_devices(&self) {
@@ -60,12 +64,12 @@ impl Audio {
     pub fn capture_device(&mut self, device_index: AudioDeviceIndex) {
         self.stop_audio_capture();
         self.device_index = device_index;
-        self.begin_audio_capture();
+        self.begin_audio_capture(device_index);
     }
 
-    pub fn get_current_device_name(&self) -> String {
+    pub fn get_device_name(&self, device_index: AudioDeviceIndex) -> String {
         self.audio_subsystem
-            .audio_capture_device_name(self.device_index)
+            .audio_capture_device_name(device_index)
             .expect("could not get audio device")
     }
 
@@ -99,14 +103,14 @@ impl Audio {
             .collect::<Vec<_>>()
     }
 
-    pub fn begin_audio_capture(&mut self) {
+    pub fn begin_audio_capture(&mut self, device_index: AudioDeviceIndex) {
         let sample_rate: u32 = 44100;
         let frame_rate = self.frame_rate.unwrap();
 
         // how many samples to capture at a time
         // should be enough for 1 frame or less
         // should not be larger than max_samples / channels
-        let max_samples: usize = projectm_rs::core::Projectm::pcm_get_max_samples()
+        let max_samples: usize = projectm::core::Projectm::pcm_get_max_samples()
             .try_into()
             .unwrap();
         let samples_per_frame = (sample_rate / frame_rate) as usize;
@@ -120,7 +124,7 @@ impl Audio {
         };
 
         // open audio device for capture
-        let device_name = self.get_current_device_name();
+        let device_name = self.get_device_name(device_index);
         let audio_device = match self
             .audio_subsystem // sdl
             .open_capture(device_name.as_str(), &desired_spec, |_spec| {
@@ -150,7 +154,7 @@ impl Audio {
     }
 
     pub fn stop_audio_capture(&mut self) {
-        let current_device_name = self.get_current_device_name();
+        let current_device_name = self.get_device_name(self.device_index);
         println!("Stopping audio capture for device {}", current_device_name);
 
         println!(
@@ -165,6 +169,7 @@ impl Audio {
         device.pause();
 
         self.is_capturing = false;
+        drop(device);
     }
 }
 
@@ -183,6 +188,6 @@ impl AudioCallback for AudioCaptureCallback {
     // we need to pass it to projectm
     fn callback(&mut self, out: &mut [SampleFormat]) {
         let pm = *self.pm.lock().unwrap();
-        projectm_rs::core::Projectm::pcm_add_float(pm, out.to_vec(), 2);
+        projectm::core::Projectm::pcm_add_float(pm, out.to_vec(), 2);
     }
 }
