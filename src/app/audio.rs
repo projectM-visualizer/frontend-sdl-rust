@@ -48,7 +48,7 @@ impl Audio {
         self.frame_rate = frame_rate.into();
 
         #[cfg(not(feature = "dummy_audio"))]
-        self.begin_audio_capture(AudioDevice::
+        self.begin_audio_capture(0);
     }
 
     pub fn list_devices(&self) {
