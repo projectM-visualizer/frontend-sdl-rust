@@ -63,8 +63,10 @@ impl Audio {
     /// Start capturing audio from device_index.
     pub fn capture_device(&mut self, device_index: AudioDeviceIndex) {
         self.stop_audio_capture();
+        println!("Capturing audio from device {}", device_index);
         self.device_index = device_index;
         self.begin_audio_capture(device_index);
+        println!("Capturing audio from device {}", device_index);
     }
 
     pub fn get_device_name(&self, device_index: AudioDeviceIndex) -> String {
@@ -123,6 +125,7 @@ impl Audio {
 
         // open audio device for capture
         let device_name = self.get_device_name(device_index);
+        println!("Opening audio device: {}", device_name);
         let audio_device = match self
             .audio_subsystem // sdl
             .open_capture(device_name.as_str(), &desired_spec, |_spec| {
@@ -166,8 +169,13 @@ impl Audio {
         let device = self.capturing_device.take().unwrap();
         device.pause();
 
+        println!("Device paused");
+
         self.is_capturing = false;
+
+        println!("Stopped audio capture");
         drop(device);
+        println!("Dropped audio device");
     }
 }
 
