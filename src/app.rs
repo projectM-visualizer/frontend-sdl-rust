@@ -68,7 +68,8 @@ impl App {
         let playlist = projectm::playlist::Playlist::create(&pm);
 
         // get/set window size
-        let (width, height) = window.size_in_pixels();
+        // let (width, height) = window.size_in_pixels();
+        let (width, height) = window.size();
         pm.set_window_size(width.try_into().unwrap(), height.try_into().unwrap());
 
         // initialize audio
