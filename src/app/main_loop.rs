@@ -1,6 +1,6 @@
 use sdl3::event::Event;
 use sdl3::keyboard::Keycode;
-
+use sdl3::timer::{delay, ticks};
 use crate::app::App;
 
 #[cfg(feature = "dummy_audio")]
@@ -13,12 +13,11 @@ impl App {
 
         // events
         let mut event_pump = self.sdl_context.event_pump().unwrap();
-        let timer = self.sdl_context.timer().unwrap();
 
         // renderLoop
         'running: loop {
             // get start time
-            let start_time = timer.ticks();
+            let start_time = ticks();
 
             // check for event
             for event in event_pump.poll_iter() {
@@ -97,7 +96,7 @@ impl App {
 
             // generate random audio
             #[cfg(feature = "dummy_audio")]
-            dummy_audio::generate_random_audio_data(self.pm);
+            dummy_audio::generate_random_audio_data(&self.pm);
 
             // render a frame
             self.pm.render_frame();
@@ -107,13 +106,13 @@ impl App {
 
             if frame_rate > 0 {
                 // calculate frame time
-                let frame_time: i32 = (timer.ticks() - start_time).try_into().unwrap();
+                let frame_time: i32 = (ticks() - start_time).try_into().unwrap();
                 // what do we need to hit target frame rate?
                 let frame_rate_i32: i32 = frame_rate.try_into().unwrap();
                 let delay_needed: i32 = 1000 / frame_rate_i32 - frame_time;
                 if delay_needed > 0 {
                     // sleep the remaining frame time
-                    timer.delay(delay_needed.try_into().unwrap());
+                    delay(delay_needed.try_into().unwrap());
                 }
             }
         }

@@ -1,25 +1,25 @@
 use projectm::core::ProjectM;
-use sdl3::audio::{AudioCallback, AudioDevice, AudioSpecDesired};
+use sdl3::audio::{AudioDevice, AudioDeviceID, AudioRecordingCallback, AudioSpec, AudioStreamWithCallback};
 
 use super::config::FrameRate;
 use super::ProjectMWrapped;
 
 use std::rc::Rc;
 
-type AudioDeviceIndex = u32;
+// let the user cycle through audio devices
+type AudioDeviceIndex = usize;
+
 type SampleFormat = f32; // format of audio samples
 
-pub struct AudioCaptureDevice {
-    name: String,
-    index: AudioDeviceIndex,
-}
 
 pub struct Audio {
     audio_subsystem: sdl3::AudioSubsystem,
-    device_index: AudioDeviceIndex,
+
+    current_recording_device: Option<AudioDevice>,
+    capture_stream: Option<Box<AudioStreamWithCallback<AudioCaptureCallback>>>,
     is_capturing: bool,
+
     frame_rate: Option<FrameRate>,
-    capturing_device: Option<Box<AudioDevice<AudioCaptureCallback>>>,
     projectm: ProjectMWrapped,
 }
 
@@ -35,9 +35,9 @@ impl Audio {
         Self {
             is_capturing: false,
             audio_subsystem,
-            device_index: 0,
+            current_recording_device: None,
             frame_rate: None,
-            capturing_device: None,
+            capture_stream: None,
             projectm,
         }
     }
@@ -48,7 +48,7 @@ impl Audio {
         self.frame_rate = frame_rate.into();
 
         #[cfg(not(feature = "dummy_audio"))]
-        self.begin_audio_capture(0);
+        self.begin_audio_capture(self.get_default_recording_device().id());
     }
 
     pub fn list_devices(&self) {
@@ -56,54 +56,53 @@ impl Audio {
 
         println!("Audio Devices:");
         for device in devices {
-            println!(" - {}: {}", device.index, device.name);
+            println!(" - {} [{}]", device.name(), device.id());
         }
     }
 
-    /// Start capturing audio from device_index.
-    pub fn capture_device(&mut self, device_index: AudioDeviceIndex) {
+    /// Start capturing audio from device_id.
+    pub fn capture_device(&mut self, device_id: AudioDeviceID) {
         self.stop_audio_capture();
-        self.device_index = device_index;
-        self.begin_audio_capture(device_index);
+        self.begin_audio_capture(device_id);
     }
 
-    pub fn get_device_name(&self, device_index: AudioDeviceIndex) -> String {
-        self.audio_subsystem
-            .audio_capture_device_name(device_index)
-            .expect("could not get audio device")
+    fn get_default_recording_device(&self) -> AudioDevice {
+        self.audio_subsystem.default_recording_device()
     }
+
+
+    // pub fn get_device_at_index(&mut self, device_index: AudioDeviceIndex) -> AudioDevice {
+    //         let devices = self.get_device_list();
+    //     if device_index < devices.len() as AudioDeviceIndex {
+    //         // should it return a ref or make a new AudioDevice?
+    //         AudioDevice::clone(&devices[device_index])
+    //     } else {
+    //         if devices.is_empty() {
+    //             panic!("No audio recording devices found");
+    //         }
+    //         self.device_index = 0;
+    //         AudioDevice::clone(&devices[0])
+    //     }
+    // }
 
     /// Select a new audio device and start capturing audio from it.
     pub fn open_next_device(&mut self) {
         let device_list = self.get_device_list();
-        let current_device_index = self.device_index;
-
-        let next_device_index = (current_device_index + 1) % device_list.len() as AudioDeviceIndex;
-        println!("Opening next device: {}", next_device_index);
-        self.capture_device(next_device_index);
+        let current_device = self.current_recording_device.as_ref().unwrap();
+        let current_device_id = current_device.id();
+        let current_device_index = device_list.iter().position(|d| d.eq(&current_device_id)).unwrap();
+        let next_device_index = (current_device_index + 1) % device_list.len();
+        let next_device_id = device_list[next_device_index];
+        self.capture_device(next_device_id);
     }
 
-    fn get_device_list(&self) -> Vec<AudioCaptureDevice> {
+    fn get_device_list(&self) -> Vec<AudioDeviceID> {
         let audio_subsystem = &self.audio_subsystem;
 
-        let num_devices = audio_subsystem
-            .num_audio_capture_devices()
-            .expect("could not get number of audio devices");
-
-        (0..num_devices)
-            .map(|i| {
-                let device_name = audio_subsystem
-                    .audio_capture_device_name(i)
-                    .expect("could not get audio device");
-                AudioCaptureDevice {
-                    name: device_name,
-                    index: i,
-                }
-            })
-            .collect::<Vec<_>>()
+        audio_subsystem.audio_recording_device_ids().unwrap()
     }
 
-    pub fn begin_audio_capture(&mut self, device_index: AudioDeviceIndex) {
+    pub fn begin_audio_capture(&mut self, device_id: AudioDeviceID) {
         let sample_rate: u32 = 44100;
         let frame_rate = self.frame_rate.unwrap();
 
@@ -113,57 +112,57 @@ impl Audio {
         let max_samples: usize = ProjectM::pcm_get_max_samples().try_into().unwrap();
         let samples_per_frame = (sample_rate / frame_rate) as usize;
         let buffer_size = std::cmp::min(max_samples / 2, samples_per_frame);
+        println!("Capturing audio from device {}", device_id.name());
         println!("Buffer size: {}", buffer_size);
 
-        let desired_spec = AudioSpecDesired {
+        let desired_spec = AudioSpec {
             freq: Some(sample_rate.try_into().unwrap()),
             channels: Some(2),
-            samples: Some(buffer_size.try_into().unwrap()),
+            format: Some(sdl3::audio::AudioFormat::f32_sys()),
         };
 
         // open audio device for capture
-        let device_name = self.get_device_name(device_index);
-        let audio_device = match self
-            .audio_subsystem // sdl
-            .open_capture(device_name.as_str(), &desired_spec, |_spec| {
-                println!("Beginning audio capture for device {}", device_name);
+        let device = AudioDevice::new(device_id);
+        let audio_stream =
+            device
+                // move this to open_recording_device
+                .open_recording_stream_with_callback(
+                    &desired_spec,
+                    AudioCaptureCallback {
+                        pm: Rc::clone(&self.projectm),
+                    },
+                ).unwrap();
 
-                // print spec
-                println!("Audio Spec: {:?}", _spec);
-
-                // return callback fn
-                AudioCaptureCallback {
-                    pm: Rc::clone(&self.projectm),
-                }
-            }) {
-            Ok(device) => device,
-            Err(e) => {
-                println!("Error opening audio device: {}", e);
-                return;
-            }
-        };
 
         // start capturing
-        audio_device.resume();
+        audio_stream.resume();
 
         // take ownership of device
-        self.capturing_device = Some(Box::new(audio_device));
+        self.capture_stream = Some(Box::new(audio_stream));
         self.is_capturing = true;
     }
 
-    pub fn stop_audio_capture(&mut self) {
-        let current_device_name = self.get_device_name(self.device_index);
-        println!("Stopping audio capture for device {}", current_device_name);
+    pub fn recording_device_name(&self) -> Option<String> {
+        self.current_recording_device.as_ref().map(|device| device.name())
+    }
 
-        println!(
-            "Current capture device status: {:?}",
-            self.capturing_device.as_ref().unwrap().status()
-        );
+    pub fn stop_audio_capture(&mut self) {
+        if self.current_recording_device.is_none() {
+            return;
+        }
+
+        let current_device_name = self.recording_device_name();
+        println!("Stopping audio capture for device {}", current_device_name.unwrap_or("unknown".to_string()));
+
+        // println!(
+        //     "Current capture device status: {:?}",
+        //     self.capture_stream.as_ref().unwrap().status()
+        // );
 
         // take ownership of device
         // capture device will be dropped when this function returns
         // and the audio callback will stop being called
-        let device = self.capturing_device.take().unwrap();
+        let device = self.capture_stream.take().unwrap();
         device.pause();
 
         self.is_capturing = false;
@@ -179,12 +178,17 @@ struct AudioCaptureCallback {
 unsafe impl Send for AudioCaptureCallback {}
 unsafe impl Sync for AudioCaptureCallback {}
 
-impl AudioCallback for AudioCaptureCallback {
-    type Channel = SampleFormat;
-
+impl AudioRecordingCallback<SampleFormat> for AudioCaptureCallback {
     // we are receiving some chunk of audio data
     // we need to pass it to projectm
-    fn callback(&mut self, out: &mut [SampleFormat]) {
+    fn callback(&mut self, out: &[SampleFormat]) {
+        println!("Received {} samples", out.len());
+        let mut out = out;
+        let max_samples = ProjectM::pcm_get_max_samples() as usize;
+        if (out.len() > max_samples) {
+            // remove some samples
+            out = &out[..max_samples];
+        }
         self.pm.pcm_add_float(out.to_vec(), 2);
     }
 }

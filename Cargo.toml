@@ -12,8 +12,8 @@ libc = "*"
  projectm = { path = "../projectm-rs", version = "4.1.0-alpha", features = [] }
 #projectm = { git = "https://github.com/projectM-visualizer/projectm" nd}
 # sdl3 = { git = "https://github.com/revmischa/sdl3-rs.git", features = ["use-bindgen"] }
-sdl3 = "0.5.0"
-# sdl3 = { path = "../../sdl3-rs", version = "0.6.0", features = ["use-bindgen"] }
+#sdl3 = { version="0.10.4", features = ["build-from-source"]}
+ sdl3 = { path = "../../sdl3-rs", version = "0", features = ["build-from-source"] }
 rand = "0.8.5"
 include_dir = "0.7.3"
 # gl = "0.14.0"
