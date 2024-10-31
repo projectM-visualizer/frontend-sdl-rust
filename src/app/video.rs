@@ -9,5 +9,11 @@ impl App {
                 _ => true,
             })
             .unwrap();
+        self.update_projectm_window_size();
+    }
+
+    pub fn update_projectm_window_size(&mut self) {
+        let (width, height) = self.window.size();
+        self.pm.set_window_size(width as usize, height as usize);
     }
 }

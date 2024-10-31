@@ -70,21 +70,6 @@ impl Audio {
         self.audio_subsystem.default_recording_device()
     }
 
-
-    // pub fn get_device_at_index(&mut self, device_index: AudioDeviceIndex) -> AudioDevice {
-    //         let devices = self.get_device_list();
-    //     if device_index < devices.len() as AudioDeviceIndex {
-    //         // should it return a ref or make a new AudioDevice?
-    //         AudioDevice::clone(&devices[device_index])
-    //     } else {
-    //         if devices.is_empty() {
-    //             panic!("No audio recording devices found");
-    //         }
-    //         self.device_index = 0;
-    //         AudioDevice::clone(&devices[0])
-    //     }
-    // }
-
     /// Select a new audio device and start capturing audio from it.
     pub fn open_next_device(&mut self) {
         let device_list = self.get_device_list();
@@ -135,10 +120,11 @@ impl Audio {
 
 
         // start capturing
-        audio_stream.resume();
+        audio_stream.resume().expect("Failed to start audio capture");
 
         // take ownership of device
         self.capture_stream = Some(Box::new(audio_stream));
+        self.current_recording_device = Some(device);
         self.is_capturing = true;
     }
 
@@ -154,16 +140,11 @@ impl Audio {
         let current_device_name = self.recording_device_name();
         println!("Stopping audio capture for device {}", current_device_name.unwrap_or("unknown".to_string()));
 
-        // println!(
-        //     "Current capture device status: {:?}",
-        //     self.capture_stream.as_ref().unwrap().status()
-        // );
-
         // take ownership of device
         // capture device will be dropped when this function returns
         // and the audio callback will stop being called
         let device = self.capture_stream.take().unwrap();
-        device.pause();
+        device.pause().expect("Failed to stop audio capture");
 
         self.is_capturing = false;
         drop(device);

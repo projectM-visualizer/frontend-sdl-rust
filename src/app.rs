@@ -68,11 +68,7 @@ impl App {
         let display_bounds = video_subsystem.display_usable_bounds(primary_display_id).unwrap();
         window.set_size(display_bounds.width(), display_bounds.height()).unwrap();
         window.set_position(WindowPos::Centered, WindowPos::Centered);
-
-        // get/set window size
-        // let (width, height) = window.size_in_pixels();
-        let (width, height) = window.size();
-        pm.set_window_size(width.try_into().unwrap(), height.try_into().unwrap());
+        window.set_display_mode(None).expect("could not set display mode");
 
         // initialize audio
         let audio = audio::Audio::new(&sdl_context, Rc::clone(&pm));
@@ -94,5 +90,7 @@ impl App {
 
         // initialize audio
         self.audio.init(self.get_frame_rate());
+        
+        self.update_projectm_window_size();
     }
 }
