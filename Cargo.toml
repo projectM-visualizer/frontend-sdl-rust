@@ -4,19 +4,14 @@ version = "0.1.1"
 edition = "2021"
 rust-version = "1.68.2"
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
-
 [dependencies]
 libc = "*"
-# projectm = "1.0.5"
- projectm = { path = "../projectm-rs", version = "4.1.0-alpha", features = [] }
-#projectm = { git = "https://github.com/projectM-visualizer/projectm" nd}
-# sdl3 = { git = "https://github.com/revmischa/sdl3-rs.git", features = ["use-bindgen"] }
-sdl3 = "0.5.0"
-# sdl3 = { path = "../../sdl3-rs", version = "0.6.0", features = ["use-bindgen"] }
+#projectm = { path = "../projectm-rs", version = "2.0.2", features = ["playlist"] }
+projectm = { version = "2.0.2", features = ['playlist'] }
+sdl3 = { version = "0", features = ["build-from-source"] }
+#sdl3 = { path = "../../sdl3-rs", version = "0", features = ["build-from-source"] }
 rand = "0.8.5"
-include_dir = "0.7.3"
-# gl = "0.14.0"
+include_dir = "0.7"
 
 [features]
 static-link = ["sdl3/static-link"]
