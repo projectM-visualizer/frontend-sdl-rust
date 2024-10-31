@@ -1,5 +1,7 @@
 use projectm::core::ProjectM;
-use sdl3::audio::{AudioDevice, AudioDeviceID, AudioRecordingCallback, AudioSpec, AudioStreamWithCallback};
+use sdl3::audio::{
+    AudioDevice, AudioDeviceID, AudioRecordingCallback, AudioSpec, AudioStreamWithCallback,
+};
 
 use super::config::FrameRate;
 use super::ProjectMWrapped;
@@ -10,7 +12,6 @@ use std::rc::Rc;
 type AudioDeviceIndex = usize;
 
 type SampleFormat = f32; // format of audio samples
-
 
 pub struct Audio {
     audio_subsystem: sdl3::AudioSubsystem,
@@ -75,7 +76,10 @@ impl Audio {
         let device_list = self.get_device_list();
         let current_device = self.current_recording_device.as_ref().unwrap();
         let current_device_id = current_device.id();
-        let current_device_index = device_list.iter().position(|d| d.eq(&current_device_id)).unwrap();
+        let current_device_index = device_list
+            .iter()
+            .position(|d| d.eq(&current_device_id))
+            .unwrap();
         let next_device_index = (current_device_index + 1) % device_list.len();
         let next_device_id = device_list[next_device_index];
         self.capture_device(next_device_id);
@@ -108,19 +112,20 @@ impl Audio {
 
         // open audio device for capture
         let device = AudioDevice::new(device_id);
-        let audio_stream =
-            device
-                // move this to open_recording_device
-                .open_recording_stream_with_callback(
-                    &desired_spec,
-                    AudioCaptureCallback {
-                        pm: Rc::clone(&self.projectm),
-                    },
-                ).unwrap();
-
+        let audio_stream = device
+            // move this to open_recording_device
+            .open_recording_stream_with_callback(
+                &desired_spec,
+                AudioCaptureCallback {
+                    pm: Rc::clone(&self.projectm),
+                },
+            )
+            .unwrap();
 
         // start capturing
-        audio_stream.resume().expect("Failed to start audio capture");
+        audio_stream
+            .resume()
+            .expect("Failed to start audio capture");
 
         // take ownership of device
         self.capture_stream = Some(Box::new(audio_stream));
@@ -129,7 +134,9 @@ impl Audio {
     }
 
     pub fn recording_device_name(&self) -> Option<String> {
-        self.current_recording_device.as_ref().map(|device| device.name())
+        self.current_recording_device
+            .as_ref()
+            .map(|device| device.name())
     }
 
     pub fn stop_audio_capture(&mut self) {
@@ -138,7 +145,10 @@ impl Audio {
         }
 
         let current_device_name = self.recording_device_name();
-        println!("Stopping audio capture for device {}", current_device_name.unwrap_or("unknown".to_string()));
+        println!(
+            "Stopping audio capture for device {}",
+            current_device_name.unwrap_or("unknown".to_string())
+        );
 
         // take ownership of device
         // capture device will be dropped when this function returns

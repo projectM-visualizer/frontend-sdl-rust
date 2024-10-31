@@ -65,10 +65,16 @@ impl App {
 
         // make window full-size
         let primary_display_id = video_subsystem.get_primary_display_id();
-        let display_bounds = video_subsystem.display_usable_bounds(primary_display_id).unwrap();
-        window.set_size(display_bounds.width(), display_bounds.height()).unwrap();
+        let display_bounds = video_subsystem
+            .display_usable_bounds(primary_display_id)
+            .unwrap();
+        window
+            .set_size(display_bounds.width(), display_bounds.height())
+            .unwrap();
         window.set_position(WindowPos::Centered, WindowPos::Centered);
-        window.set_display_mode(None).expect("could not set display mode");
+        window
+            .set_display_mode(None)
+            .expect("could not set display mode");
 
         // initialize audio
         let audio = audio::Audio::new(&sdl_context, Rc::clone(&pm));
@@ -90,7 +96,7 @@ impl App {
 
         // initialize audio
         self.audio.init(self.get_frame_rate());
-        
+
         self.update_projectm_window_size();
     }
 }

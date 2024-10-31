@@ -1,7 +1,7 @@
+use crate::app::App;
 use sdl3::event::Event;
 use sdl3::keyboard::Keycode;
 use sdl3::timer::{delay, ticks};
-use crate::app::App;
 
 #[cfg(feature = "dummy_audio")]
 use crate::dummy_audio;
