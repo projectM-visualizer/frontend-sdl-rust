@@ -9,11 +9,12 @@ rust-version = "1.68.2"
 [dependencies]
 libc = "*"
 # projectm = "1.0.5"
- projectm = { path = "../projectm-rs", version = "4.1.0-alpha", features = [] }
+#projectm = { path = "../projectm-rs", version = "2.0.2", features = ["playlist"] }
+projectm = { version = "2.0.2", features = ['playlist'] }
 #projectm = { git = "https://github.com/projectM-visualizer/projectm" nd}
 # sdl3 = { git = "https://github.com/revmischa/sdl3-rs.git", features = ["use-bindgen"] }
-#sdl3 = { version="0.10.4", features = ["build-from-source"]}
- sdl3 = { path = "../../sdl3-rs", version = "0", features = ["build-from-source"] }
+sdl3 = { version = "0", features = ["build-from-source"] }
+#sdl3 = { path = "../../sdl3-rs", version = "0", features = ["build-from-source"] }
 rand = "0.8.5"
 include_dir = "0.7.3"
 # gl = "0.14.0"
