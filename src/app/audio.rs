@@ -1,9 +1,11 @@
+use projectm::core::ProjectM;
 use sdl3::audio::{AudioDevice, AudioDeviceID, AudioSpec, AudioStream};
 
 use super::config::FrameRate;
 use super::ProjectMWrapped;
 
 type SampleFormat = f32; // Format of audio samples
+const CHANNELS: u32 = 2; // Number of audio channels
 
 pub struct Audio {
     audio_subsystem: sdl3::AudioSubsystem,
@@ -40,7 +42,7 @@ impl Audio {
         self.frame_rate = Some(frame_rate);
 
         #[cfg(not(feature = "dummy_audio"))]
-        self.begin_audio_capture(None);
+        self.begin_audio_recording(None);
     }
 
     pub fn list_devices(&self) {
@@ -53,19 +55,19 @@ impl Audio {
     }
 
     /// Start capturing audio from device_id.
-    pub fn begin_audio_capture(&mut self, device_id: Option<AudioDeviceID>) {
+    pub fn begin_audio_recording(&mut self, device_id: Option<AudioDeviceID>) {
         // Stop capturing from current stream/device
-        self.stop_audio_capture();
+        self.stop_audio_recording();
 
         let sample_rate: u32 = 44100;
 
         let desired_spec = AudioSpec {
             freq: Some(sample_rate as i32),
-            channels: Some(2),
+            channels: Some(CHANNELS.try_into().unwrap()),
             format: Some(sdl3::audio::AudioFormat::f32_sys()), // Assuming F32SYS is the correct format
         };
 
-        // Open audio device for capture (use default device if none specified)
+        // Open audio device for recording (use default device if none specified)
         let device_id = device_id
             .or_else(|| Some(self.get_default_recording_device().id()))
             .unwrap(); // Ensure device_id is Some
@@ -140,21 +142,11 @@ impl Audio {
         );
 
         // Start capturing from next device
-        self.begin_audio_capture(Some(next_device_id));
+        self.begin_audio_recording(Some(next_device_id));
     }
 
-    fn get_device_list(&self) -> Vec<AudioDeviceID> {
-        self.audio_subsystem.audio_recording_device_ids().unwrap_or_else(|e| {
-            println!("Failed to get audio device list: {}", e);
-            Vec::new()
-        })
-    }
 
-    pub fn recording_device_name(&self) -> Option<String> {
-        self.current_device_name.clone()
-    }
-
-    pub fn stop_audio_capture(&mut self) {
+    pub fn stop_audio_recording(&mut self) {
         if let Some(stream) = self.recording_stream.take() {
             // Retrieve the device name before dropping the stream
             let current_device_name = stream.device_name().unwrap_or_else(|| "unknown".to_string());
@@ -168,5 +160,64 @@ impl Audio {
             self.is_capturing = false;
             drop(stream);
         }
+    }
+
+    /// Read all available audio samples from the recording stream and feed them to ProjectM.
+    /// This method should be called once per frame.
+    pub fn process_frame_samples(&mut self) {
+        if !self.is_capturing || self.recording_stream.is_none() {
+            return;
+        }
+
+        let stream = self.recording_stream.as_mut().unwrap();
+        let available_bytes = stream.available_bytes();
+        if available_bytes.is_err() || available_bytes.unwrap() == 0 {
+            // nothing to read
+            return;
+        }
+
+        // Retrieve the maximum number of PCM samples ProjectM can handle
+        let max_samples: usize = ProjectM::pcm_get_max_samples()
+            .try_into()
+            .expect("Failed to convert max samples to usize");
+
+        // Allocate the sample buffer once to reuse in the loop
+        let mut sample_buf = vec![0.0f32; max_samples];
+
+        // Start the loop to read and process samples
+        loop {
+            // Attempt to read samples into the buffer
+            match stream.read_f32_samples(&mut sample_buf) {
+                Ok(samples_read) => {
+                    if samples_read == 0 {
+                        // No more data to read; exit the loop
+                        // println!("No more audio data to read. Exiting loop.");
+                        break;
+                    }
+
+                    // println!("Read {} samples", samples_read);
+                    // Add the read samples to ProjectM for processing
+                    self.projectm
+                        .pcm_add_float(&sample_buf[..samples_read], CHANNELS);
+                }
+                Err(e) => {
+                    // Handle any read errors
+                    println!("Failed to read audio samples: {}", e);
+                    break; // Exit the loop on error
+                }
+            }
+        }
+
+    }
+
+    fn get_device_list(&self) -> Vec<AudioDeviceID> {
+        self.audio_subsystem.audio_recording_device_ids().unwrap_or_else(|e| {
+            println!("Failed to get audio device list: {}", e);
+            Vec::new()
+        })
+    }
+
+    pub fn recording_device_name(&self) -> Option<String> {
+        self.current_device_name.clone()
     }
 }
