@@ -8,7 +8,7 @@ rust-version = "1.68.2"
 libc = "*"
 #projectm = { path = "../projectm-rs", version = "2.0.2", features = ["playlist"] }
 projectm = { version = "2.0.2", features = ['playlist'] }
-sdl3 = { version = "0", features = ["build-from-source"] }
+sdl3 = { version = "0.10.8", features = ["build-from-source"] }
 #sdl3 = { path = "../../sdl3-rs", version = "0", features = ["build-from-source"] }
 rand = "0.8.5"
 include_dir = "0.7"
