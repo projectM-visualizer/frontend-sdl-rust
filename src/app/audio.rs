@@ -191,11 +191,9 @@ impl Audio {
                 Ok(samples_read) => {
                     if samples_read == 0 {
                         // No more data to read; exit the loop
-                        // println!("No more audio data to read. Exiting loop.");
                         break;
                     }
 
-                    // println!("Read {} samples", samples_read);
                     // Add the read samples to ProjectM for processing
                     self.projectm
                         .pcm_add_float(&sample_buf[..samples_read], CHANNELS);
