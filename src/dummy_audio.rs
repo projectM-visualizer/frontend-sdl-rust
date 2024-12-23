@@ -13,5 +13,5 @@ pub fn generate_random_audio_data(pm: &ProjectMWrapped) {
         }
     }
 
-    pm.pcm_add_int16(pcm_data, 2);
+    pm.pcm_add_int16(&pcm_data, 2);
 }

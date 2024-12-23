@@ -97,6 +97,10 @@ impl App {
             // generate random audio
             #[cfg(feature = "dummy_audio")]
             dummy_audio::generate_random_audio_data(&self.pm);
+            
+            // Feed audio data from capture device to projectM
+            #[cfg(not(feature = "dummy_audio"))]
+            self.audio.process_frame_samples();
 
             // render a frame
             self.pm.render_frame();
