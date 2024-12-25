@@ -218,9 +218,9 @@ dependencies = [
 
 [[package]]
 name = "projectm"
-version = "3.1.1"
+version = "3.1.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "58ea270346057465a68f573e4d1c35b2b30abeb479d3622e0c882ea7a6891516"
+checksum = "a81ed6e24cd4ca8ceaa5421127abd1b6a0a1ff9a96c397377dfd4a93e867cabb"
 dependencies = [
  "libc",
  "projectm-sys",
@@ -229,9 +229,9 @@ dependencies = [
 
 [[package]]
 name = "projectm-sys"
-version = "1.2.1"
+version = "1.2.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6365f7261b468baa8f1d1e2ae98be4000514ab94733e8de37fdf03450602d10c"
+checksum = "25cefe874b73cb8da95def230af489949f0b9e77788e1777eaf345c860d6ca5a"
 dependencies = [
  "bindgen",
  "cmake",

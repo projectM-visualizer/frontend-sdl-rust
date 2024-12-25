@@ -6,8 +6,8 @@ rust-version = "1.68.2"
 
 [dependencies]
 libc = "*"
-#projectm = { path = "../projectm-rs", version = "3", features = ["playlist"] }
-projectm = { version = "3", features = ['playlist'] }
+#projectm = { path = "../projectm-rs", version = "3", features = ["playlist", "static"] }
+projectm = { version = "3", features = ['playlist', 'static'] }
 sdl3 = { version = "0.11", features = ["build-from-source-static"] }
 #sdl3 = { path = "../../sdl3-rs", version = "0", features = ["build-from-source"] }
 rand = "0.8.5"
