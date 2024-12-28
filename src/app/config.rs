@@ -23,30 +23,40 @@ pub struct Config {
     pub preset_duration: Option<f64>,
 }
 
+#[cfg(target_os = "macos")]
+fn default_resource_dir() -> std::path::PathBuf {
+    // current_exe() => /Path/To/projectm_sdl.app/Contents/MacOS/projectm_sdl
+    let exe_path = std::env::current_exe().unwrap();
+    // Jump up two levels to Contents/, then into Resources
+    exe_path
+        .parent() // MacOS
+        .unwrap()
+        .parent() // Contents
+        .unwrap()
+        .join("Resources")
+}
+
+#[cfg(not(target_os = "macos"))]
+fn default_resource_dir() -> std::path::PathBuf {
+    // On Linux, Windows, etc., do as you wish
+    "/usr/local/share/projectM".into()
+}
+
 impl Default for Config {
     fn default() -> Self {
-        // get paths to presets and textures
-        // TODO: get from config file or env
-        //
-        // use /usr/local/share/projectM if it exists, otherwise use local paths
-        let resource_dir = "/usr/local/share/projectM";
-        let dir_exists = Path::new(&resource_dir).exists();
-        let preset_path = if dir_exists && false {
-            String::from(resource_dir) + "/presets"
-        } else {
-            // just test presets
-            "./presets".to_owned()
-        };
-        let texture_path = if dir_exists {
-            String::from(resource_dir) + "/textures"
-        } else {
-            // doesn't exist
-            "./textures".to_owned()
-        };
+        #[cfg(target_os = "macos")]
+        let resource_dir = default_resource_dir(); // points to .app/Contents/Resources
+
+        #[cfg(not(target_os = "macos"))]
+        let resource_dir = std::path::PathBuf::from("/usr/local/share/projectM");
+
+        // Construct paths
+        let presets_path = resource_dir.join("presets");
+        let textures_path = resource_dir.join("textures");
 
         Self {
-            preset_path: Path::new(&preset_path).exists().then(|| preset_path),
-            texture_path: Path::new(&texture_path).exists().then(|| texture_path),
+            preset_path: presets_path.exists().then(|| presets_path.to_string_lossy().to_string()),
+            texture_path: textures_path.exists().then(|| textures_path.to_string_lossy().to_string()),
             frame_rate: Some(60),
             beat_sensitivity: Some(1.0),
             preset_duration: Some(10.0),
