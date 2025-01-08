@@ -24,6 +24,9 @@ APP_EXECUTABLE_PATH="${APP_BUNDLE_PATH}/Contents/MacOS"
 INFO_PLIST_PATH="${APP_BUNDLE_PATH}/Contents/Info.plist"
 RESOURCES_PATH="${APP_BUNDLE_PATH}/Contents/Resources"
 
+# Entitlements file (if sandboxing is needed)
+ENTITLEMENTS_FILE="${OUTPUT_DIR}/entitlements.plist"
+
 # Zip paths
 PRE_NOTARIZATION_ZIP="${OUTPUT_DIR}/${APP_NAME}-pre-notarization.zip"
 FINAL_ZIP="${OUTPUT_DIR}/${APP_NAME}.zip"
@@ -58,8 +61,9 @@ mkdir -p "${RESOURCES_PATH}"
 mv "${UNIVERSAL_BINARY}" "${APP_EXECUTABLE_PATH}/${APP_NAME}"
 
 #######################################
-# 4) Create Info.plist
+# 4) Create Info.plist with Microphone Access
 #######################################
+echo "==> Creating Info.plist"
 cat > "${INFO_PLIST_PATH}" <<EOL
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN"
@@ -78,12 +82,32 @@ cat > "${INFO_PLIST_PATH}" <<EOL
     <string>APPL</string>
     <key>LSMinimumSystemVersion</key>
     <string>10.12</string>
+    <key>NSMicrophoneUsageDescription</key>
+    <string>This app requires microphone access for audio input.</string>
 </dict>
 </plist>
 EOL
 
 #######################################
-# 5) Clone and Copy Presets/Textures
+# 5) (Optional) Create Entitlements File for Sandboxing
+#######################################
+echo "==> Creating entitlements file for sandboxing (optional)"
+cat > "${ENTITLEMENTS_FILE}" <<EOL
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN"
+    "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>com.apple.security.app-sandbox</key>
+    <true/>
+    <key>com.apple.security.device.audio-input</key>
+    <true/>
+</dict>
+</plist>
+EOL
+
+#######################################
+# 6) Clone and Copy Presets/Textures
 #######################################
 echo "==> Cloning preset repositories"
 TEMP_DIR="$(mktemp -d)"
@@ -103,14 +127,15 @@ popd >/dev/null
 rm -rf "$TEMP_DIR"
 
 #######################################
-# 6) Sign the .app Bundle
+# 7) Sign the .app Bundle with Entitlements
 #######################################
-echo "==> Signing the .app with hardened runtime"
+echo "==> Signing the .app with hardened runtime and entitlements"
 codesign --deep --verbose --force --options runtime \
+  --entitlements "${ENTITLEMENTS_FILE}" \
   --sign "${DEVELOPER_ID}" "${APP_BUNDLE_PATH}"
 
 #######################################
-# 7) Zip the Signed .app for Notarization
+# 8) Zip the Signed .app for Notarization
 #######################################
 echo "==> Creating zip for notarization"
 rm -f "${PRE_NOTARIZATION_ZIP}"
@@ -119,7 +144,7 @@ ditto -c -k --sequesterRsrc --keepParent \
   "${PRE_NOTARIZATION_ZIP}"
 
 #######################################
-# 8) Submit the Zip File for Notarization
+# 9) Submit the Zip File for Notarization
 #######################################
 echo "==> Submitting for notarization"
 xcrun notarytool submit "${PRE_NOTARIZATION_ZIP}" \
@@ -128,13 +153,13 @@ xcrun notarytool submit "${PRE_NOTARIZATION_ZIP}" \
   --wait
 
 #######################################
-# 9) Staple the Now-Notarized .app
+# 10) Staple the Now-Notarized .app
 #######################################
 echo "==> Stapling notarization ticket to .app"
 xcrun stapler staple "${APP_BUNDLE_PATH}"
 
 #######################################
-# 10) (Optional) Create Final Zip with Stapled .app
+# 11) (Optional) Create Final Zip with Stapled .app
 #######################################
 echo "==> Creating final zip of stapled .app"
 rm -f "${FINAL_ZIP}"
@@ -143,9 +168,12 @@ ditto -c -k --sequesterRsrc --keepParent \
   "${FINAL_ZIP}"
 
 #######################################
-# 11) Verify with Gatekeeper
+# 12) Verify with Gatekeeper
 #######################################
 echo "==> Verifying with spctl"
 spctl --assess --verbose=4 "${APP_BUNDLE_PATH}"
+
+rm "${PRE_NOTARIZATION_ZIP}"
+rm "${ENTITLEMENTS_FILE}"
 
 echo "✅ Build, sign, notarize, staple, and package completed successfully!"
