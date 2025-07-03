@@ -64,10 +64,8 @@ impl App {
         let playlist = projectm::playlist::Playlist::create(&pm);
 
         // make window full-size
-        let primary_display_id = video_subsystem.get_primary_display_id();
-        let display_bounds = video_subsystem
-            .display_usable_bounds(primary_display_id)
-            .unwrap();
+        let primary_display = video_subsystem.get_primary_display().unwrap();
+        let display_bounds = primary_display.get_usable_bounds().unwrap();
         window
             .set_size(display_bounds.width(), display_bounds.height())
             .unwrap();
