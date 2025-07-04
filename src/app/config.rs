@@ -1,20 +1,25 @@
 use crate::app::App;
-use std::path::Path;
+use confique::Config as ConfiqueConfig;
+use serde::{Deserialize, Serialize};
+use std::path::{Path, PathBuf};
 
 pub type FrameRate = u32;
 
+const RESOURCE_DIR_DEFAULT: &str = "/usr/local/share/projectM";
+
 /// Configuration for the application
-/// TODO: use config crate to support loading from env/CLI/file.
 /// Parameters are defined here: https://github.com/projectM-visualizer/projectm/blob/master/src/api/include/projectM-4/parameters.h
+// #[derive(Debug, Serialize, Deserialize)]
+#[derive(ConfiqueConfig, Debug, Serialize, Deserialize)]
 pub struct Config {
     /// Frame rate to render at. Defaults to 60.
     pub frame_rate: Option<FrameRate>,
 
     /// Path to the preset directory. Defaults to /usr/local/share/projectM/presets
-    pub preset_path: Option<String>,
+    pub preset_path: Option<PathBuf>,
 
     /// Path to the texture directory. Defaults to /usr/local/share/projectM/textures
-    pub texture_path: Option<String>,
+    pub texture_path: Option<PathBuf>,
 
     /// How sensitive the beat detection is. 1.0 is default.
     pub beat_sensitivity: Option<f32>,
@@ -64,6 +69,20 @@ impl Default for Config {
     }
 }
 
+impl Config {
+    // Merges another Config into this one
+    pub fn merge(&mut self, mut other: Self) {
+        self.frame_rate = other.frame_rate.take().or(self.frame_rate.take());
+        self.preset_path = other.preset_path.take().or(self.preset_path.take());
+        self.texture_path = other.texture_path.take().or(self.texture_path.take());
+        self.beat_sensitivity = other
+            .beat_sensitivity
+            .take()
+            .or(self.beat_sensitivity.take());
+        self.preset_duration = other.preset_duration.take().or(self.preset_duration.take());
+    }
+}
+
 impl App {
     pub fn load_config(&self, config: &Config) {
         let pm = &self.pm;
@@ -80,8 +99,7 @@ impl App {
 
         // load textures if provided
         if let Some(texture_path) = &config.texture_path {
-            let mut paths: Vec<String> = Vec::new();
-            paths.push(texture_path.into());
+            let paths = [texture_path.clone().into_os_string().into_string().unwrap()];
             pm.set_texture_search_paths(&paths, 1);
         }
 

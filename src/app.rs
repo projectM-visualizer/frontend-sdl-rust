@@ -1,5 +1,6 @@
+use crate::app::config::Config;
 use projectm::core::ProjectM;
-use sdl3::video::{GLProfile, WindowPos};
+use sdl3::video::GLProfile;
 use std::convert::TryInto;
 use std::rc::Rc;
 
@@ -22,12 +23,8 @@ pub struct App {
     _gl_context: sdl3::video::GLContext,
 }
 
-pub fn default_config() -> config::Config {
-    config::Config::default()
-}
-
 impl App {
-    pub fn new(config: Option<crate::app::config::Config>) -> Self {
+    pub fn new(config: Option<Config>) -> Self {
         // setup sdl
         let sdl_context = sdl3::init().unwrap();
         // print SDL version
@@ -82,7 +79,7 @@ impl App {
             playlist,
             sdl_context,
             window,
-            config: config.unwrap_or_else(default_config),
+            config: config.unwrap_or_else(Config::default),
             audio,
             _gl_context: gl_context, // keep this around to keep the context alive
         }
