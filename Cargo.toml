@@ -12,8 +12,8 @@ sdl3 = { version = "0.14.24", features = ["build-from-source-static"] }
 #sdl3 = { path = "../../sdl3-rs", version = "0", features = ["build-from-source"] }
 rand = "0.8.5"
 include_dir = "0.7"
-clap = {version="4.4.5", features=["derive"]}
-confique = "0.2.4"
+clap = {version="4.4.5", features=["derive", "env"]}
+confique = {version="0.3.0", features=["toml", "yaml", "json5"]}
 serde = "1.0.188"
 # gl = "0.14.0"
 
