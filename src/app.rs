@@ -1,6 +1,6 @@
 use crate::app::config::Config;
 use projectm::core::ProjectM;
-use sdl3::video::GLProfile;
+use sdl3::video::{GLProfile, WindowPos};
 use std::convert::TryInto;
 use std::rc::Rc;
 

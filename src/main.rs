@@ -1,6 +1,6 @@
 mod app;
 mod dummy_audio;
-use std::{net::IpAddr, path::PathBuf};
+use std::{path::PathBuf};
 
 use crate::app::config::Config;
 use clap::Parser;

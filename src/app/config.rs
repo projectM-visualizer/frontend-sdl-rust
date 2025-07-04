@@ -1,7 +1,7 @@
 use crate::app::App;
 use confique::Config as ConfiqueConfig;
 use serde::{Deserialize, Serialize};
-use std::path::{Path, PathBuf};
+use std::path::{PathBuf};
 
 pub type FrameRate = u32;
 
@@ -60,8 +60,8 @@ impl Default for Config {
         let textures_path = resource_dir.join("textures");
 
         Self {
-            preset_path: presets_path.exists().then(|| presets_path.to_string_lossy().to_string()),
-            texture_path: textures_path.exists().then(|| textures_path.to_string_lossy().to_string()),
+            preset_path: presets_path.exists().then(|| presets_path),
+            texture_path: textures_path.exists().then(|| textures_path),
             frame_rate: Some(60),
             beat_sensitivity: Some(1.0),
             preset_duration: Some(10.0),
