@@ -24,7 +24,7 @@ pub struct App {
 }
 
 impl App {
-    pub fn new(config: Option<Config>) -> Self {
+    pub fn new(config: Config) -> Self {
         // setup sdl
         let sdl_context = sdl3::init().unwrap();
         // print SDL version
@@ -74,12 +74,14 @@ impl App {
         // initialize audio
         let audio = audio::Audio::new(&sdl_context, Rc::clone(&pm));
 
+        println!("Application initialized with configuration:\n{}", config);
+
         Self {
             pm,
             playlist,
             sdl_context,
             window,
-            config: config.unwrap_or_else(Config::default),
+            config,
             audio,
             _gl_context: gl_context, // keep this around to keep the context alive
         }
@@ -87,7 +89,7 @@ impl App {
 
     pub fn init(&mut self) {
         // load config
-        self.load_config(&self.config);
+        self.apply_config(&self.config);
 
         // initialize audio
         self.audio.init(self.get_frame_rate());

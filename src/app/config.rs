@@ -1,7 +1,6 @@
 use crate::app::App;
-use confique::Config as ConfiqueConfig;
-use serde::{Deserialize, Serialize};
-use std::path::{PathBuf};
+use core::fmt;
+use std::path::PathBuf;
 
 pub type FrameRate = u32;
 
@@ -9,8 +8,7 @@ const RESOURCE_DIR_DEFAULT: &str = "/usr/local/share/projectM";
 
 /// Configuration for the application
 /// Parameters are defined here: https://github.com/projectM-visualizer/projectm/blob/master/src/api/include/projectM-4/parameters.h
-// #[derive(Debug, Serialize, Deserialize)]
-#[derive(ConfiqueConfig, Debug, Serialize, Deserialize)]
+#[derive(Debug)]
 pub struct Config {
     /// Frame rate to render at. Defaults to 60.
     pub frame_rate: Option<FrameRate>,
@@ -26,6 +24,51 @@ pub struct Config {
 
     /// How long to play a preset before switching to a new one (seconds).
     pub preset_duration: Option<f64>,
+}
+
+impl fmt::Display for Config {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        writeln!(
+            f,
+            "- Preset path: {}",
+            self.preset_path
+                .as_ref()
+                .map_or("Not specified".to_string(), |p| p
+                    .canonicalize()
+                    .unwrap_or_else(|_| p.clone())
+                    .display()
+                    .to_string())
+        )?;
+        writeln!(
+            f,
+            "- Texture path: {}",
+            self.texture_path
+                .as_ref()
+                .map_or("Not specified".to_string(), |p| p
+                    .canonicalize()
+                    .unwrap_or_else(|_| p.clone())
+                    .display()
+                    .to_string())
+        )?;
+        writeln!(
+            f,
+            "- Frame Rate: {}",
+            self.frame_rate
+                .map_or("Not specified".to_string(), |r| r.to_string())
+        )?;
+        writeln!(
+            f,
+            "- Beat Sensitivity: {}",
+            self.beat_sensitivity
+                .map_or("Not specified".to_string(), |s| s.to_string())
+        )?;
+        write!(
+            f,
+            "- Preset Duration: {}",
+            self.preset_duration
+                .map_or("Not specified".to_string(), |d| d.to_string())
+        )
+    }
 }
 
 #[cfg(target_os = "macos")]
@@ -84,7 +127,7 @@ impl Config {
 }
 
 impl App {
-    pub fn load_config(&self, config: &Config) {
+    pub fn apply_config(&self, config: &Config) {
         let pm = &self.pm;
 
         // load presets if provided
