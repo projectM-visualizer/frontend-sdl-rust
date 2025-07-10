@@ -505,7 +505,6 @@ dependencies = [
  "projectm",
  "rand",
  "sdl3",
- "serde",
 ]
 
 [[package]]
