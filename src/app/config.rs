@@ -1,26 +1,69 @@
 use crate::app::App;
-use std::path::Path;
+use core::fmt;
+use std::path::PathBuf;
 
 pub type FrameRate = u32;
 
+const RESOURCE_DIR_DEFAULT: &str = "/usr/local/share/projectM";
+
 /// Configuration for the application
-/// TODO: use config crate to support loading from env/CLI/file.
 /// Parameters are defined here: https://github.com/projectM-visualizer/projectm/blob/master/src/api/include/projectM-4/parameters.h
 pub struct Config {
     /// Frame rate to render at. Defaults to 60.
     pub frame_rate: Option<FrameRate>,
 
     /// Path to the preset directory. Defaults to /usr/local/share/projectM/presets
-    pub preset_path: Option<String>,
+    pub preset_path: Option<PathBuf>,
 
     /// Path to the texture directory. Defaults to /usr/local/share/projectM/textures
-    pub texture_path: Option<String>,
+    pub texture_path: Option<PathBuf>,
 
     /// How sensitive the beat detection is. 1.0 is default.
     pub beat_sensitivity: Option<f32>,
 
     /// How long to play a preset before switching to a new one (seconds).
     pub preset_duration: Option<f64>,
+}
+
+impl fmt::Display for Config {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        writeln!(
+            f,
+            "  Preset path: {}",
+            self.preset_path.as_ref().map_or("None".to_string(), |p| p
+                .canonicalize()
+                .unwrap_or_else(|_| p.clone())
+                .display()
+                .to_string())
+        )?;
+        writeln!(
+            f,
+            "  Texture path: {}",
+            self.texture_path.as_ref().map_or("None".to_string(), |p| p
+                .canonicalize()
+                .unwrap_or_else(|_| p.clone())
+                .display()
+                .to_string())
+        )?;
+        writeln!(
+            f,
+            "  Frame Rate: {}",
+            self.frame_rate
+                .map_or("Not specified".to_string(), |r| r.to_string())
+        )?;
+        writeln!(
+            f,
+            "  Beat Sensitivity: {}",
+            self.beat_sensitivity
+                .map_or("Not specified".to_string(), |s| s.to_string())
+        )?;
+        write!(
+            f,
+            "  Preset Duration: {}",
+            self.preset_duration
+                .map_or("Not specified".to_string(), |d| d.to_string())
+        )
+    }
 }
 
 #[cfg(target_os = "macos")]
@@ -55,8 +98,8 @@ impl Default for Config {
         let textures_path = resource_dir.join("textures");
 
         Self {
-            preset_path: presets_path.exists().then(|| presets_path.to_string_lossy().to_string()),
-            texture_path: textures_path.exists().then(|| textures_path.to_string_lossy().to_string()),
+            preset_path: presets_path.exists().then(|| presets_path),
+            texture_path: textures_path.exists().then(|| textures_path),
             frame_rate: Some(60),
             beat_sensitivity: Some(1.0),
             preset_duration: Some(10.0),
@@ -65,23 +108,22 @@ impl Default for Config {
 }
 
 impl App {
-    pub fn load_config(&self, config: &Config) {
+    pub fn apply_config(&self, config: &Config) {
         let pm = &self.pm;
-
-        // load presets if provided
-        if let Some(preset_path) = &config.preset_path {
-            self.add_preset_path(preset_path);
-        }
 
         // set frame rate if provided
         if let Some(frame_rate) = config.frame_rate {
             pm.set_fps(frame_rate);
         }
 
+        // load presets if provided
+        if let Some(preset_path) = &config.preset_path {
+            self.add_preset_path(preset_path);
+        }
+
         // load textures if provided
         if let Some(texture_path) = &config.texture_path {
-            let mut paths: Vec<String> = Vec::new();
-            paths.push(texture_path.into());
+            let paths = [texture_path.clone().into_os_string().into_string().unwrap()];
             pm.set_texture_search_paths(&paths, 1);
         }
 
