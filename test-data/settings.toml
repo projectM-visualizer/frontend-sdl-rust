@@ -1,0 +1,6 @@
+config_path = "/home/user/.config/projectm/config.toml"
+frame_rate = 60
+preset_path = "/home/user/.local/share/projectm/presets"
+texture_path = "/home/user/.local/share/projectm/textures"
+beat_sensitivity = 1.0
+preset_duration = 10.0

@@ -30,41 +30,37 @@ impl fmt::Display for Config {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         writeln!(
             f,
-            "- Preset path: {}",
-            self.preset_path
-                .as_ref()
-                .map_or("Not specified".to_string(), |p| p
-                    .canonicalize()
-                    .unwrap_or_else(|_| p.clone())
-                    .display()
-                    .to_string())
+            "  Preset path: {}",
+            self.preset_path.as_ref().map_or("None".to_string(), |p| p
+                .canonicalize()
+                .unwrap_or_else(|_| p.clone())
+                .display()
+                .to_string())
         )?;
         writeln!(
             f,
-            "- Texture path: {}",
-            self.texture_path
-                .as_ref()
-                .map_or("Not specified".to_string(), |p| p
-                    .canonicalize()
-                    .unwrap_or_else(|_| p.clone())
-                    .display()
-                    .to_string())
+            "  Texture path: {}",
+            self.texture_path.as_ref().map_or("None".to_string(), |p| p
+                .canonicalize()
+                .unwrap_or_else(|_| p.clone())
+                .display()
+                .to_string())
         )?;
         writeln!(
             f,
-            "- Frame Rate: {}",
+            "  Frame Rate: {}",
             self.frame_rate
                 .map_or("Not specified".to_string(), |r| r.to_string())
         )?;
         writeln!(
             f,
-            "- Beat Sensitivity: {}",
+            "  Beat Sensitivity: {}",
             self.beat_sensitivity
                 .map_or("Not specified".to_string(), |s| s.to_string())
         )?;
         write!(
             f,
-            "- Preset Duration: {}",
+            "  Preset Duration: {}",
             self.preset_duration
                 .map_or("Not specified".to_string(), |d| d.to_string())
         )
@@ -112,32 +108,18 @@ impl Default for Config {
     }
 }
 
-impl Config {
-    // Merges another Config into this one
-    pub fn merge(&mut self, mut other: Self) {
-        self.frame_rate = other.frame_rate.take().or(self.frame_rate.take());
-        self.preset_path = other.preset_path.take().or(self.preset_path.take());
-        self.texture_path = other.texture_path.take().or(self.texture_path.take());
-        self.beat_sensitivity = other
-            .beat_sensitivity
-            .take()
-            .or(self.beat_sensitivity.take());
-        self.preset_duration = other.preset_duration.take().or(self.preset_duration.take());
-    }
-}
-
 impl App {
     pub fn apply_config(&self, config: &Config) {
         let pm = &self.pm;
 
-        // load presets if provided
-        if let Some(preset_path) = &config.preset_path {
-            self.add_preset_path(preset_path);
-        }
-
         // set frame rate if provided
         if let Some(frame_rate) = config.frame_rate {
             pm.set_fps(frame_rate);
+        }
+
+        // load presets if provided
+        if let Some(preset_path) = &config.preset_path {
+            self.add_preset_path(preset_path);
         }
 
         // load textures if provided

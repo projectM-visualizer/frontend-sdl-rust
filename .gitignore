@@ -1,3 +1,4 @@
 .vscode/
 target/
 .nvim-dap.lua
+.DS_STORE
