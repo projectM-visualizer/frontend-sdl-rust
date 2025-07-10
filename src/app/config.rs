@@ -8,7 +8,6 @@ const RESOURCE_DIR_DEFAULT: &str = "/usr/local/share/projectM";
 
 /// Configuration for the application
 /// Parameters are defined here: https://github.com/projectM-visualizer/projectm/blob/master/src/api/include/projectM-4/parameters.h
-#[derive(Debug)]
 pub struct Config {
     /// Frame rate to render at. Defaults to 60.
     pub frame_rate: Option<FrameRate>,

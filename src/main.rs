@@ -67,7 +67,7 @@ impl Default for Settings {
 }
 
 impl Settings {
-    // Overrides `self`` with values of `other``, if they exist
+    // Overrides `self` with values of `other`, if they exist
     fn apply(&mut self, other: &Settings) {
         if let Some(config_path) = &other.config_path {
             self.config_path = Some(config_path.clone());
@@ -110,6 +110,7 @@ fn load_settings_file(path: Option<PathBuf>) -> Result<Settings, String> {
 
         println!("Loading config from: {}", path.display());
 
+        // Load setting from file
         let settings = Settings::builder()
             .file(path)
             .load()
@@ -118,6 +119,7 @@ fn load_settings_file(path: Option<PathBuf>) -> Result<Settings, String> {
         return Ok(settings);
     }
 
+    // No path, return empty settings
     return Ok(Settings {
         config_path: None,
         frame_rate: None,
@@ -132,9 +134,10 @@ fn load_settings() -> Result<Settings, String> {
     // Load CLI flags and env vars
     let cli = Settings::parse();
 
+    // Load file
     let mut settings = load_settings_file(cli.config_path.clone())?;
 
-    // Apply CLI and env vars (override)
+    // Override file with CLI/env vars/defaults
     settings.apply(&cli);
 
     return Ok(settings);
@@ -154,7 +157,7 @@ fn main() -> Result<(), String> {
     // Initialize the application
     let mut app = app::App::new(app_config);
     app.init();
-    // app.main_loop();
+    app.main_loop();
 
     Ok(())
 }
@@ -182,7 +185,7 @@ mod tests {
     #[test]
     fn test_load_toml() {
         let res = Settings::builder()
-            .file("test-data/settings.toml")
+            .file("test-data/config.toml")
             .load()
             .expect("TOML settings should load");
 
