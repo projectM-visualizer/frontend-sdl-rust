@@ -47,6 +47,7 @@ impl App {
         // create window
         let mut window = video_subsystem
             .window("ProjectM", 1024, 768)
+            .opengl()
             .build()
             .expect("could not initialize video subsystem");
 
