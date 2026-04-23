@@ -53,7 +53,7 @@ impl Audio {
             println!(
                 " - {} [{}]",
                 device.name().unwrap_or_else(|_| "unknown".to_string()),
-                device.id()
+                device.id().value()
             );
         }
     }
@@ -146,7 +146,9 @@ impl Audio {
         println!(
             "Switching from device '{}' to '{}'",
             current_device_name.unwrap_or_else(|| "unknown".to_string()),
-            next_device_id.name().unwrap_or_else(|_| "unknown".to_string())
+            next_device_id
+                .name()
+                .unwrap_or_else(|_| "unknown".to_string())
         );
 
         // Start capturing from next device
