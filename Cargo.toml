@@ -1,19 +1,20 @@
 [package]
 name = "projectm_sdl"
-version = "0.1.1"
+version = "0.1.2"
 edition = "2021"
 rust-version = "1.68.2"
 
 [dependencies]
 libc = "*"
-#projectm = { path = "../projectm-rs", version = "3", features = ["playlist", "static"] }
+# Note: Uncomment and swap out the projectm dep below, if you are
+# building/testing with a local copy of the projectm-rs crate
+# projectm = { path = "../projectm-rs", version = "3", features = ["playlist", "static"] }
 projectm = { version = "3", features = ['playlist', 'static'] }
-sdl3 = { version = "0.14.24", features = ["build-from-source-static"] }
-#sdl3 = { path = "../../sdl3-rs", version = "0", features = ["build-from-source"] }
-rand = "0.8.5"
+sdl3 = { version = "0.18.0", features = ["build-from-source-static"] }
+rand = "0.10.1"
 include_dir = "0.7"
-clap = {version="4.4.5", features=["derive", "env"]}
-confique = {version="0.3.0", features=["toml", "yaml", "json5"]}
+clap = { version = "4.6.1", features = ["derive", "env"] }
+confique = { version = "0.4.0", features = ["toml", "yaml", "json5"] }
 
 [features]
 static-link = ["sdl3/static-link"]
