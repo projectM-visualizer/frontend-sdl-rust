@@ -103,6 +103,37 @@ RUSTFLAGS="-L$(brew --prefix sdl3)/lib" cargo run
 cargo run --release
 ```
 
+### Configuration file
+
+You can pass a config file with `-c`:
+
+```
+./projectm -c config.toml
+./projectm -c config.properties
+```
+
+Supported formats: `.toml`, `.json`, `.yaml`, `.properties`
+
+The `.properties` format is compatible with config files from the C++ SDL frontend (projectMSDL). Example:
+
+```
+audio.device: BlackHole 2ch
+projectM.presetPath: /path/to/your/presets
+projectM.shuffleEnabled: true
+projectM.transitionDuration: 10
+projectM.displayDuration: 60
+window.width: 1280
+window.height: 720
+```
+
+### macOS: Microphone / audio capture permission
+
+On macOS, the application needs permission to capture audio. If the visualizer doesn't react to audio, check:
+
+**System Settings → Privacy & Security → Microphone**
+
+Grant access to your terminal application (e.g. Terminal.app, iTerm2) or the projectm binary directly. macOS silently blocks audio capture without this permission — no error will be shown.
+
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 <!-- CONTRIBUTING -->
