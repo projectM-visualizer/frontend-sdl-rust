@@ -28,8 +28,9 @@ pub struct Config {
     /// Whether to shuffle presets.
     pub shuffle_enabled: Option<bool>,
 
-    /// Transition duration between presets (seconds).
-    pub transition_duration: Option<f64>,
+    /// Soft-cut (crossfade blend) duration between presets (seconds).
+    /// Maps to projectM.transitionDuration in .properties files.
+    pub soft_cut_duration: Option<f64>,
 
     /// Whether the current preset is locked (won't auto-switch).
     pub preset_locked: Option<bool>,
@@ -102,8 +103,8 @@ impl fmt::Display for Config {
         )?;
         writeln!(
             f,
-            "  Transition Duration: {}",
-            self.transition_duration
+            "  Soft-cut Duration: {}",
+            self.soft_cut_duration
                 .map_or("Not specified".to_string(), |d| d.to_string())
         )?;
         write!(
@@ -154,7 +155,7 @@ impl Default for Config {
             beat_sensitivity: Some(1.0),
             preset_duration: Some(10.0),
             shuffle_enabled: None,
-            transition_duration: None,
+            soft_cut_duration: None,
             preset_locked: None,
             audio_device: None,
             window_width: None,
@@ -176,7 +177,29 @@ impl App {
             pm.set_fps(frame_rate);
         }
 
-        // load presets if provided
+        // set beat sensitivity if provided
+        if let Some(beat_sensitivity) = config.beat_sensitivity {
+            pm.set_beat_sensitivity(beat_sensitivity);
+        }
+
+        // set preset duration if provided (must be set before play_next so the
+        // correct duration is in effect when the first preset starts its timer)
+        if let Some(preset_duration) = config.preset_duration {
+            pm.set_preset_duration(preset_duration);
+        }
+
+        // set soft-cut (crossfade) duration if provided
+        // maps to projectM.transitionDuration in .properties files
+        if let Some(soft_cut_duration) = config.soft_cut_duration {
+            pm.set_soft_cut_duration(soft_cut_duration);
+        }
+
+        // set shuffle mode
+        if let Some(shuffle) = config.shuffle_enabled {
+            self.playlist.set_shuffle(shuffle);
+        }
+
+        // load presets and start playback (after duration is configured)
         if let Some(preset_path) = &config.preset_path {
             self.add_preset_path(preset_path);
             // Trigger playback of the first preset from the loaded path
@@ -187,21 +210,6 @@ impl App {
         if let Some(texture_path) = &config.texture_path {
             let paths = [texture_path.clone().into_os_string().into_string().unwrap()];
             pm.set_texture_search_paths(&paths, 1);
-        }
-
-        // set beat sensitivity if provided
-        if let Some(beat_sensitivity) = config.beat_sensitivity {
-            pm.set_beat_sensitivity(beat_sensitivity);
-        }
-
-        // set preset duration if provided
-        if let Some(preset_duration) = config.preset_duration {
-            pm.set_preset_duration(preset_duration);
-        }
-
-        // set shuffle mode
-        if let Some(shuffle) = config.shuffle_enabled {
-            self.playlist.set_shuffle(shuffle);
         }
 
         // Note: preset_locked from .properties is acknowledged but the projectM

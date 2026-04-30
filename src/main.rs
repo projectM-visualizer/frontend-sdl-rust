@@ -37,13 +37,11 @@ struct Settings {
     texture_path: Option<PathBuf>,
 
     #[arg(short, long)]
-    #[arg(default_value = "1.0")]
     #[arg(env = "PM_BEAT_SENSITIVITY")]
     /// Sensitivity of the beat detection
     beat_sensitivity: Option<f32>,
 
     #[arg(short = 'd', long)]
-    #[arg(default_value = "10")]
     #[arg(env = "PM_PRESET_DURATION")]
     /// Duration (seconds) each preset will play
     preset_duration: Option<f64>,
@@ -165,10 +163,11 @@ fn load_properties_settings(path: &std::path::Path) -> Result<Settings, String> 
         preset_path: ps.preset_path,
         texture_path: None, // Not in .properties format
         beat_sensitivity: None, // Not in .properties format
-        // displayDuration maps to preset_duration (how long a preset plays)
+        // displayDuration → preset_duration (how long a preset plays before switching)
         preset_duration: ps.display_duration,
         audio_device: ps.audio_device,
         shuffle_enabled: ps.shuffle_enabled,
+        // transitionDuration → soft_cut_duration (crossfade blend time)
         transition_duration: ps.transition_duration,
     })
 }
@@ -208,7 +207,7 @@ fn main() -> Result<(), String> {
         beat_sensitivity: settings.beat_sensitivity,
         preset_duration: settings.preset_duration,
         shuffle_enabled: settings.shuffle_enabled,
-        transition_duration: settings.transition_duration,
+        soft_cut_duration: settings.transition_duration,
         preset_locked: props_window.as_ref().and_then(|p| p.preset_locked),
         audio_device: settings.audio_device,
         window_width: props_window.as_ref().and_then(|p| p.window_width),
