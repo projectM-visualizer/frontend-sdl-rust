@@ -8,6 +8,7 @@ const RESOURCE_DIR_DEFAULT: &str = "/usr/local/share/projectM";
 
 /// Configuration for the application
 /// Parameters are defined here: https://github.com/projectM-visualizer/projectm/blob/master/src/api/include/projectM-4/parameters.h
+#[derive(Clone)]
 pub struct Config {
     /// Frame rate to render at. Defaults to 60.
     pub frame_rate: Option<FrameRate>,
@@ -23,6 +24,37 @@ pub struct Config {
 
     /// How long to play a preset before switching to a new one (seconds).
     pub preset_duration: Option<f64>,
+
+    /// Whether to shuffle presets.
+    pub shuffle_enabled: Option<bool>,
+
+    /// Soft-cut (crossfade blend) duration between presets (seconds).
+    /// Maps to projectM.transitionDuration in .properties files.
+    pub soft_cut_duration: Option<f64>,
+
+    /// Whether the current preset is locked (won't auto-switch).
+    pub preset_locked: Option<bool>,
+
+    /// Audio device name to use for capture.
+    pub audio_device: Option<String>,
+
+    /// Window width.
+    pub window_width: Option<u32>,
+
+    /// Window height.
+    pub window_height: Option<u32>,
+
+    /// Window X position.
+    pub window_left: Option<i32>,
+
+    /// Window Y position.
+    pub window_top: Option<i32>,
+
+    /// Monitor index.
+    pub window_monitor: Option<u32>,
+
+    /// Whether to override default window position.
+    pub window_override_position: Option<bool>,
 }
 
 impl fmt::Display for Config {
@@ -57,11 +89,30 @@ impl fmt::Display for Config {
             self.beat_sensitivity
                 .map_or("Not specified".to_string(), |s| s.to_string())
         )?;
-        write!(
+        writeln!(
             f,
             "  Preset Duration: {}",
             self.preset_duration
                 .map_or("Not specified".to_string(), |d| d.to_string())
+        )?;
+        writeln!(
+            f,
+            "  Shuffle: {}",
+            self.shuffle_enabled
+                .map_or("Not specified".to_string(), |s| s.to_string())
+        )?;
+        writeln!(
+            f,
+            "  Soft-cut Duration: {}",
+            self.soft_cut_duration
+                .map_or("Not specified".to_string(), |d| d.to_string())
+        )?;
+        write!(
+            f,
+            "  Audio Device: {}",
+            self.audio_device
+                .as_ref()
+                .map_or("default".to_string(), |d| d.clone())
         )
     }
 }
@@ -103,12 +154,22 @@ impl Default for Config {
             frame_rate: Some(60),
             beat_sensitivity: Some(1.0),
             preset_duration: Some(10.0),
+            shuffle_enabled: None,
+            soft_cut_duration: None,
+            preset_locked: None,
+            audio_device: None,
+            window_width: None,
+            window_height: None,
+            window_left: None,
+            window_top: None,
+            window_monitor: None,
+            window_override_position: None,
         }
     }
 }
 
 impl App {
-    pub fn apply_config(&self, config: &Config) {
+    pub fn apply_config(&mut self, config: &Config) {
         let pm = &self.pm;
 
         // set frame rate if provided
@@ -116,9 +177,33 @@ impl App {
             pm.set_fps(frame_rate);
         }
 
-        // load presets if provided
+        // set beat sensitivity if provided
+        if let Some(beat_sensitivity) = config.beat_sensitivity {
+            pm.set_beat_sensitivity(beat_sensitivity);
+        }
+
+        // set preset duration if provided (must be set before play_next so the
+        // correct duration is in effect when the first preset starts its timer)
+        if let Some(preset_duration) = config.preset_duration {
+            pm.set_preset_duration(preset_duration);
+        }
+
+        // set soft-cut (crossfade) duration if provided
+        // maps to projectM.transitionDuration in .properties files
+        if let Some(soft_cut_duration) = config.soft_cut_duration {
+            pm.set_soft_cut_duration(soft_cut_duration);
+        }
+
+        // set shuffle mode
+        if let Some(shuffle) = config.shuffle_enabled {
+            self.playlist.set_shuffle(shuffle);
+        }
+
+        // load presets and start playback (after duration is configured)
         if let Some(preset_path) = &config.preset_path {
             self.add_preset_path(preset_path);
+            // Trigger playback of the first preset from the loaded path
+            self.playlist.play_next();
         }
 
         // load textures if provided
@@ -127,18 +212,9 @@ impl App {
             pm.set_texture_search_paths(&paths, 1);
         }
 
-        // set beat sensitivity if provided
-        if let Some(beat_sensitivity) = config.beat_sensitivity {
-            pm.set_beat_sensitivity(beat_sensitivity);
-        }
-
-        // set preset duration if provided
-        if let Some(preset_duration) = config.preset_duration {
-            pm.set_preset_duration(preset_duration);
-        }
-
-        // set preset shuffle mode
-        // self.playlist.set_shuffle(true);
+        // Note: preset_locked from .properties is acknowledged but the projectM
+        // playlist API doesn't expose a direct lock method in the Rust bindings.
+        // Users can press the preset lock key at runtime instead.
     }
 
     pub fn get_frame_rate(&self) -> FrameRate {

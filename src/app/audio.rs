@@ -15,10 +15,11 @@ pub struct Audio {
     projectm: ProjectMWrapped,
     current_device_id: Option<AudioDeviceID>,
     current_device_name: Option<String>, // Store device name for comparison
+    requested_device_name: Option<String>, // Device name from config
 }
 
 impl Audio {
-    pub fn new(sdl_context: &sdl3::Sdl, projectm: ProjectMWrapped) -> Self {
+    pub fn new(sdl_context: &sdl3::Sdl, projectm: ProjectMWrapped, requested_device_name: Option<String>) -> Self {
         let audio_subsystem = sdl_context.audio().unwrap();
         println!(
             "Using audio driver: {}",
@@ -33,6 +34,7 @@ impl Audio {
             current_device_name: None,
             recording_stream: None,
             projectm,
+            requested_device_name,
         }
     }
 
@@ -42,7 +44,25 @@ impl Audio {
         self.frame_rate = Some(frame_rate);
 
         #[cfg(not(feature = "dummy_audio"))]
-        self.begin_audio_recording(None);
+        {
+            // If a device name was requested, find it and use it
+            if let Some(ref name) = self.requested_device_name {
+                if let Some(device_id) = self.find_device_by_name(name) {
+                    println!("Found requested audio device: {}", name);
+                    self.begin_audio_recording(Some(device_id));
+                } else {
+                    println!(
+                        "Warning: Requested audio device '{}' not found. Available devices:",
+                        name
+                    );
+                    self.list_devices();
+                    println!("Falling back to default device.");
+                    self.begin_audio_recording(None);
+                }
+            } else {
+                self.begin_audio_recording(None);
+            }
+        }
     }
 
     pub fn list_devices(&self) {
@@ -56,6 +76,32 @@ impl Audio {
                 device.id().value()
             );
         }
+    }
+
+    /// Find an audio device by name (case-insensitive substring match).
+    fn find_device_by_name(&self, name: &str) -> Option<AudioDeviceID> {
+        let devices = self.get_device_list();
+        let name_lower = name.to_lowercase();
+
+        // Try exact match first
+        for device in &devices {
+            if let Ok(device_name) = device.name() {
+                if device_name.to_lowercase() == name_lower {
+                    return Some(*device);
+                }
+            }
+        }
+
+        // Fall back to substring match
+        for device in &devices {
+            if let Ok(device_name) = device.name() {
+                if device_name.to_lowercase().contains(&name_lower) {
+                    return Some(*device);
+                }
+            }
+        }
+
+        None
     }
 
     /// Start capturing audio from device_id.
