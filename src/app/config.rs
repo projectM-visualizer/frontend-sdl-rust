@@ -179,7 +179,7 @@ impl App {
         if let Some(preset_path) = &config.preset_path {
             self.add_preset_path(preset_path);
             // Trigger playback of the first preset from the loaded path
-            self.playlist.playlist_play_next();
+            self.playlist.play_next();
         }
 
         // load textures if provided
