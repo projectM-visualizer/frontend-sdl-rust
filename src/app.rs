@@ -44,9 +44,13 @@ impl App {
         assert_eq!(gl_attr.context_profile(), GLProfile::Core);
         assert_eq!(gl_attr.context_version(), (3, 3));
 
+        // Determine initial window size from config or use defaults
+        let initial_width = config.window_width.unwrap_or(1024);
+        let initial_height = config.window_height.unwrap_or(768);
+
         // create window
         let mut window = video_subsystem
-            .window("ProjectM", 1024, 768)
+            .window("ProjectM", initial_width, initial_height)
             .opengl()
             .build()
             .expect("could not initialize video subsystem");
@@ -61,19 +65,27 @@ impl App {
         // and a preset playlist
         let playlist = projectm::playlist::Playlist::create(&pm);
 
-        // make window full-size
-        let primary_display = video_subsystem.get_primary_display().unwrap();
-        let display_bounds = primary_display.get_usable_bounds().unwrap();
-        window
-            .set_size(display_bounds.width(), display_bounds.height())
-            .unwrap();
-        window.set_position(WindowPos::Centered, WindowPos::Centered);
+        // Apply window position if override is requested
+        if config.window_override_position.unwrap_or(false) {
+            let x = config.window_left.unwrap_or(0);
+            let y = config.window_top.unwrap_or(0);
+            window.set_position(WindowPos::Positioned(x), WindowPos::Positioned(y));
+        } else if config.window_width.is_none() {
+            // Only go full-size if no explicit window size was given
+            let primary_display = video_subsystem.get_primary_display().unwrap();
+            let display_bounds = primary_display.get_usable_bounds().unwrap();
+            window
+                .set_size(display_bounds.width(), display_bounds.height())
+                .unwrap();
+            window.set_position(WindowPos::Centered, WindowPos::Centered);
+        }
+
         window
             .set_display_mode(None)
             .expect("could not set display mode");
 
-        // initialize audio
-        let audio = audio::Audio::new(&sdl_context, Rc::clone(&pm));
+        // initialize audio, passing optional device name
+        let audio = audio::Audio::new(&sdl_context, Rc::clone(&pm), config.audio_device.clone());
 
         println!("Application initialized with configuration:\n{}", config);
 

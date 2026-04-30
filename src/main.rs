@@ -1,5 +1,6 @@
 mod app;
 mod dummy_audio;
+mod properties;
 use std::path::PathBuf;
 
 use crate::app::config::Config;
@@ -16,7 +17,7 @@ use confique::Config as ConfiqueConfig;
 /// Need help? Join discord: https://discord.gg/uSSggaMBrv
 struct Settings {
     #[arg(short, long = "config")]
-    /// Path to a config file
+    /// Path to a config file (supports .toml, .json, .yaml, .properties)
     config_path: Option<PathBuf>,
 
     #[arg(short, long)]
@@ -46,11 +47,21 @@ struct Settings {
     #[arg(env = "PM_PRESET_DURATION")]
     /// Duration (seconds) each preset will play
     preset_duration: Option<f64>,
-    // TODO: Add option for specifying audio device
-    // #[arg(short, long)]
-    // #[arg(env = "PM_AUDIO_INPUT")]
-    // /// Audio input device (name or index)
-    // audio_input: Option<String>,
+
+    #[arg(short, long)]
+    #[arg(env = "PM_AUDIO_INPUT")]
+    /// Audio input device (name or substring match)
+    audio_device: Option<String>,
+
+    #[arg(long)]
+    #[arg(env = "PM_SHUFFLE")]
+    /// Enable preset shuffling
+    shuffle_enabled: Option<bool>,
+
+    #[arg(long)]
+    #[arg(env = "PM_TRANSITION_DURATION")]
+    /// Duration (seconds) of transitions between presets
+    transition_duration: Option<f64>,
 }
 
 impl Default for Settings {
@@ -62,6 +73,9 @@ impl Default for Settings {
             texture_path: None,
             beat_sensitivity: None,
             preset_duration: None,
+            audio_device: None,
+            shuffle_enabled: None,
+            transition_duration: None,
         }
     }
 }
@@ -87,6 +101,15 @@ impl Settings {
         if let Some(preset_duration) = other.preset_duration {
             self.preset_duration = Some(preset_duration);
         }
+        if let Some(audio_device) = &other.audio_device {
+            self.audio_device = Some(audio_device.clone());
+        }
+        if let Some(shuffle_enabled) = other.shuffle_enabled {
+            self.shuffle_enabled = Some(shuffle_enabled);
+        }
+        if let Some(transition_duration) = other.transition_duration {
+            self.transition_duration = Some(transition_duration);
+        }
     }
 }
 
@@ -97,12 +120,20 @@ fn load_settings_file(path: Option<PathBuf>) -> Result<Settings, String> {
         if !path.exists() {
             return Err(format!("config path invalid: {}", path.display()));
         }
-        // ensure extention is valid
-        match path.extension().and_then(|ext| ext.to_str()) {
-            Some("toml") | Some("json") | Some("yaml)") => {}
+
+        let extension = path.extension().and_then(|ext| ext.to_str());
+
+        match extension {
+            // .properties format — use custom parser
+            Some("properties") => {
+                println!("Loading .properties config from: {}", path.display());
+                return load_properties_settings(&path);
+            }
+            // TOML/JSON/YAML — use confique
+            Some("toml") | Some("json") | Some("yaml") => {}
             _ => {
                 return Err(format!(
-                    "invalid config file extension: {:?}",
+                    "invalid config file extension: {:?}. Supported: .toml, .json, .yaml, .properties",
                     path.extension()
                 ))
             }
@@ -120,14 +151,26 @@ fn load_settings_file(path: Option<PathBuf>) -> Result<Settings, String> {
     }
 
     // No path, return empty settings
-    return Ok(Settings {
-        config_path: None,
-        frame_rate: None,
-        preset_path: None,
-        texture_path: None,
-        beat_sensitivity: None,
-        preset_duration: None,
-    });
+    return Ok(Settings::default());
+}
+
+/// Load settings from a projectMSDL .properties file.
+fn load_properties_settings(path: &std::path::Path) -> Result<Settings, String> {
+    let props = properties::parse_properties_file(path)?;
+    let ps = properties::apply_properties(&props);
+
+    Ok(Settings {
+        config_path: Some(path.to_path_buf()),
+        frame_rate: None, // Not in .properties format
+        preset_path: ps.preset_path,
+        texture_path: None, // Not in .properties format
+        beat_sensitivity: None, // Not in .properties format
+        // displayDuration maps to preset_duration (how long a preset plays)
+        preset_duration: ps.display_duration,
+        audio_device: ps.audio_device,
+        shuffle_enabled: ps.shuffle_enabled,
+        transition_duration: ps.transition_duration,
+    })
 }
 
 fn load_settings() -> Result<Settings, String> {
@@ -146,12 +189,34 @@ fn load_settings() -> Result<Settings, String> {
 fn main() -> Result<(), String> {
     let settings = load_settings()?;
 
+    // Build window config from properties if loaded
+    let props_window = if let Some(ref config_path) = settings.config_path {
+        if config_path.extension().and_then(|e| e.to_str()) == Some("properties") {
+            let props = properties::parse_properties_file(config_path).ok();
+            props.map(|p| properties::apply_properties(&p))
+        } else {
+            None
+        }
+    } else {
+        None
+    };
+
     let app_config = Config {
         frame_rate: settings.frame_rate,
         preset_path: settings.preset_path,
         texture_path: settings.texture_path,
         beat_sensitivity: settings.beat_sensitivity,
         preset_duration: settings.preset_duration,
+        shuffle_enabled: settings.shuffle_enabled,
+        transition_duration: settings.transition_duration,
+        preset_locked: props_window.as_ref().and_then(|p| p.preset_locked),
+        audio_device: settings.audio_device,
+        window_width: props_window.as_ref().and_then(|p| p.window_width),
+        window_height: props_window.as_ref().and_then(|p| p.window_height),
+        window_left: props_window.as_ref().and_then(|p| p.window_left),
+        window_top: props_window.as_ref().and_then(|p| p.window_top),
+        window_monitor: props_window.as_ref().and_then(|p| p.window_monitor),
+        window_override_position: props_window.as_ref().and_then(|p| p.window_override_position),
     };
 
     // Initialize the application
@@ -219,5 +284,41 @@ mod tests {
         std::env::remove_var("PM_BEAT_SENSITIVITY");
         std::env::remove_var("PM_PRESET_DURATION");
         std::env::remove_var("PM_AUDIO_INPUT");
+    }
+
+    #[test]
+    fn test_load_properties() {
+        use std::fs;
+        use std::io::Write;
+
+        let dir = std::env::temp_dir();
+        let path = dir.join("test_load.properties");
+        let mut f = fs::File::create(&path).unwrap();
+        write!(
+            f,
+            r#"audio.device: BlackHole 2ch
+projectM.displayDuration: 60.549
+projectM.shuffleEnabled: true
+projectM.transitionDuration: 10
+projectM.presetPath: /Users/delta/presets
+window.width: 850
+window.height: 448
+"#
+        )
+        .unwrap();
+
+        let settings =
+            crate::load_settings_file(Some(path.clone())).expect("Properties should load");
+
+        assert_eq!(
+            settings.preset_path.as_ref().map(|p| p.to_str().unwrap()),
+            Some("/Users/delta/presets")
+        );
+        assert_eq!(settings.shuffle_enabled, Some(true));
+        assert_eq!(settings.transition_duration, Some(10.0));
+        assert_eq!(settings.preset_duration, Some(60.549));
+        assert_eq!(settings.audio_device.as_deref(), Some("BlackHole 2ch"));
+
+        fs::remove_file(&path).ok();
     }
 }
