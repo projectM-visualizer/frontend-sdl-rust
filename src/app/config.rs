@@ -8,6 +8,7 @@ const RESOURCE_DIR_DEFAULT: &str = "/usr/local/share/projectM";
 
 /// Configuration for the application
 /// Parameters are defined here: https://github.com/projectM-visualizer/projectm/blob/master/src/api/include/projectM-4/parameters.h
+#[derive(Clone)]
 pub struct Config {
     /// Frame rate to render at. Defaults to 60.
     pub frame_rate: Option<FrameRate>,
@@ -167,7 +168,7 @@ impl Default for Config {
 }
 
 impl App {
-    pub fn apply_config(&self, config: &Config) {
+    pub fn apply_config(&mut self, config: &Config) {
         let pm = &self.pm;
 
         // set frame rate if provided

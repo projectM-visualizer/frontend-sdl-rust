@@ -102,7 +102,8 @@ impl App {
 
     pub fn init(&mut self) {
         // load config
-        self.apply_config(&self.config);
+        let config = self.config.clone();
+        self.apply_config(&config);
 
         // initialize audio
         self.audio.init(self.get_frame_rate());
